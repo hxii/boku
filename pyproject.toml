@@ -1,0 +1,21 @@
+[project]
+name = "boku"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+authors = [
+    { name = "Paul Glushak", email = "paul@glushak.net" }
+]
+requires-python = ">=3.13"
+dependencies = [
+    "packaging>=24.2",
+    "picksy>=0.1.0",
+    "pyyaml>=6.0.2",
+]
+
+[project.scripts]
+boku = "boku:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"

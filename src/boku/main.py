@@ -1,10 +1,12 @@
 import os
+import shutil
 import re
 import subprocess
 from dataclasses import dataclass, field
 from datetime import datetime
 from pathlib import Path
 from typing import Any
+from argparse import Namespace
 
 import yaml
 from packaging.version import Version
@@ -216,6 +218,16 @@ class Task:
             outputs.append(output)
         self.output = "\n".join(outputs)
         self.run_ok = all(execution_results)
+        self.post_execute(self.run_ok)
+
+    def post_execute(self, success: bool) -> None:
+        handlers = {
+            True: self.on_success,
+            False: self.on_failure,
+        }
+        if (handler := handlers.get(success)) and handler:
+            logger.info(f"Running post-execute handler: {handler}")
+            self.run_command(handler)
 
     def run_command(self, command: str) -> tuple[bool, str]:
         """Run a command and return the success bool and output.
@@ -271,6 +283,7 @@ class VariableParser:
             variables (dict[str, Any]): Variables to parse against.
         """
         self.variables = variables
+        self.environment = os.environ.copy()
 
     def parse(self, text: str | list[str]) -> str | list[str]:
         """Parse ${var} references in strings/lists.
@@ -284,13 +297,19 @@ class VariableParser:
         if isinstance(text, list):
             return [self.parse(item) for item in text]
 
-        pattern = r"\${([^}]+)}"
+        pattern = r"\${(env:)?([^}]+)}"
 
         def replace_var(match: re.Match) -> str:
-            var_name = match.group(1)
-            if var_name not in self.variables:
-                raise ValueError(f"Variable '{var_name}' not found")
-            return str(self.variables[var_name])
+            is_env_var = match.group(1) is not None
+            var_name = match.group(2)
+            if is_env_var:
+                if var_name not in self.environment:
+                    raise ValueError(f"Environment variable '{var_name}' not found")
+                return str(self.environment.get(var_name))
+            else:
+                if var_name not in self.variables:
+                    raise ValueError(f"Variable '{var_name}' not found")
+                return str(self.variables[var_name])
 
         return re.sub(pattern, replace_var, str(text))
 
@@ -342,11 +361,18 @@ class ConfigurationHandler:
         pass
 
 
-class GlobalTask:
+class GlobalTasks:
     """Global Task Object"""
 
-    @staticmethod
-    def add(args) -> None:
+    def __init__(self) -> None:
+        self.config_handler = ConfigurationHandler()
+        self.global_tasks: dict[str, Path] = {
+            task.stem: task
+            for task in self.config_handler.global_task_dir.glob("*.y*ml")
+        }
+        """Dictionary of file stem -> task path."""
+
+    def add(self, args) -> None:
         """Add a global task from a local file.
 
         Args:
@@ -355,15 +381,29 @@ class GlobalTask:
         if not args.file:
             raise BokuException("No file specified")
         taskfile = TaskFile(taskfile_path=Path(args.file))
-        # TODO: FInish adding task.
-        # TODO: Add user verification to add task.
-        # TODO: Add optional `-y` flag to skip verification.
-        ch = ConfigurationHandler()
-        pass
+        if taskfile.taskfile_path.stem in self.global_tasks.keys():
+            raise BokuException(f"Task {args.file} already exists in global tasks.")
+        print(f"{taskfile.description}\nby {taskfile.author}")
+        proceed = input("Add global task? [y/N]: ").lower().strip() == "y"
+        if proceed:
+            return_path = shutil.copy(
+                taskfile.taskfile_path.absolute(),
+                self.config_handler.global_task_dir / taskfile.taskfile_path.name,
+            )
+            print(f"Task copied to {return_path}")
 
-    def remove(self) -> None:
+    def remove(self, args: Namespace) -> None:
         # TODO: Add task removal.
-        pass
+        if not args.file:
+            raise BokuException("No file specified")
+        if args.file in self.global_tasks.keys():
+            logger.debug(f"Taskfile {args.file} found in global tasks.")
+            taskfile_path: Path = self.global_tasks.get(args.file)
+            if input(f"Delete {taskfile_path}? [y/N]: ").lower().strip() == "y":
+                taskfile_path.unlink()
+                print(f"Taskfile {taskfile_path} deleted.")
+        else:
+            raise BokuException(f"Taskfile {args.file} not found in global tasks.")
 
     @staticmethod
     def edit(args) -> None:
@@ -373,7 +413,7 @@ class GlobalTask:
             args: Namespace object from argparse.
         """
         ch = ConfigurationHandler()
-        global_tasks = {task.name: task for task in ch.global_task_dir.glob("*.y?ml")}
+        global_tasks = {task.name: task for task in ch.global_task_dir.glob("*.y*ml")}
         editor = os.environ.get("EDITOR", "vim")
         if not args.file:
             p = Picksy(list(global_tasks.values()))
@@ -385,33 +425,27 @@ class GlobalTask:
                 if taskfile == name:
                     os.execvp(editor, [editor, str(task)])
 
-    @staticmethod
-    def _list(args) -> None:
+    def _list(self, args: Namespace) -> None:
         """List all global tasks.
 
         Args:
             args: Namespace object from argparse.
         """
-        ch = ConfigurationHandler()
-        tasks = ch.global_task_dir.glob("*.y?ml")
-        for task in tasks:
-            print(task.name)
-        pass
+        for task in self.global_tasks.keys():
+            print(task)
 
-    @staticmethod
-    def run(args) -> None:
+    def run(self, args) -> None:
         """Run a global task.
 
         Args:
             args: Namespace object from argparse.
         """
-        ch = ConfigurationHandler()
-        global_tasks = {task.name: task for task in ch.global_task_dir.glob("*.y?ml")}
-        taskfile = yaml_suffixer(args.file)
-        logger.debug(f"Global tasks: {global_tasks}")
-        logger.debug(f"Global taskfile: {taskfile}")
-        for name, task in global_tasks.items():
-            if taskfile == name:
+        for name, task in self.global_tasks.items():
+            print(f"{name}")
+            if args.file == name:
+                logger.debug(f"Global taskfile: {task}")
                 boku = Boku()
                 boku.load_taskfile(task)
                 boku.run(args)
+                return
+        raise BokuException(f"Task {args.file} not found in global tasks.")

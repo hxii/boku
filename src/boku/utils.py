@@ -23,7 +23,7 @@ def frame(message: str, padding: int = 2) -> str:
 
 def yaml_suffixer(taskfile: str) -> str:
     """Add .yaml suffix to taskfile if not present"""
-    if not taskfile.endswith(".yaml"):
+    if not taskfile.endswith((".yaml", ".yml")):
         return f"{taskfile}.yaml"
     return taskfile
 

@@ -1,12 +1,12 @@
 import argparse
-from datetime import datetime
 
 from boku.exceptions import BokuException
 from boku.logger import logger
-from boku.main import Boku, __version__, GlobalTask
+from boku.main import Boku, __version__, GlobalTasks
 from boku.utils import frame
 
 epilog = f"Boku {__version__}"
+gt = GlobalTasks()
 
 # Main parser
 parser = argparse.ArgumentParser(
@@ -31,31 +31,27 @@ global_subparsers = global_parser.add_subparsers(dest="global_command", required
 
 # Global list command
 global_list = global_subparsers.add_parser("list", help="List global tasks")
-global_list.set_defaults(func=GlobalTask._list)
+global_list.set_defaults(func=lambda args: gt._list(args))
 
 # Global add command
 global_add = global_subparsers.add_parser("add", help="Add a global task")
 global_add.add_argument("file", help="YAML task file to add globally", type=str)
-global_add.set_defaults(func=lambda args: GlobalTask.add(args))
+global_add.set_defaults(func=lambda args: gt.add(args))
 
 # Global run command
 global_run = global_subparsers.add_parser("run", help="Run a global task")
 global_run.add_argument("file", help="Global task to run", type=str)
-global_run.set_defaults(func=GlobalTask.run)
+global_run.set_defaults(func=lambda args: gt.run(args))
 
 # Global edit command
 global_edit = global_subparsers.add_parser("edit", help="Edit a global task")
 global_edit.add_argument("file", help="YAML task file to edit", type=str, nargs="?")
-global_edit.set_defaults(func=GlobalTask.edit)
+global_edit.set_defaults(func=GlobalTasks.edit)
 
 # Global remove command
 global_remove = global_subparsers.add_parser("remove", help="Remove a global task")
 global_remove.add_argument("file", help="YAML task file to remove", type=str, nargs="?")
-global_remove.set_defaults(
-    func=lambda args: print(
-        "Showing task list..." if not args.file else f"Removing {args.file}..."
-    )
-)
+global_remove.set_defaults(func=lambda args: gt.remove(args))
 
 # Regular command parser
 run_parser = subparsers.add_parser("run", help="Run a task file")

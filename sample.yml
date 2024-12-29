@@ -11,3 +11,7 @@ tasks:
     depends_on:
       - hello
     run: echo "${hello} again!"
+
+  edit:
+    run: echo "My editor is ${env:EDITOR}"
+    on_success: echo "My command was successful!"

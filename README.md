@@ -7,6 +7,12 @@ While other, most likely much better tools exist that achieve this and much more
 was to create a lightweight tool that can help me with recurring tasks without writing much code
 to achieve this.
 
+## Why?
+The idea was (and remains) to create a simple tool that I can personally use to automate simple tasks
+(with some added benefits like dependencies) without having to write code (either bash or python) to achieve this.
+It's NOT meant to be a replacement to other, much better and more sophisticated tools, but rather a simple
+solution to a simple problem with little to no learning curve, hence a simple YAML based syntax.
+
 ## Features
 
 - Configure tasks as YAML files.

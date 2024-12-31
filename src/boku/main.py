@@ -1,20 +1,25 @@
 import os
-import shutil
 import re
+import shutil
 import subprocess
+from argparse import Namespace
 from dataclasses import dataclass, field
 from datetime import datetime
 from pathlib import Path
 from typing import Any
-from argparse import Namespace
 
 import yaml
 from packaging.version import Version
 from picksy import Picksy
 
-from boku.exceptions import BokuException, TaskfileError
+from boku.exceptions import (
+    BokuDependencyError,
+    BokuTaskError,
+    BokuTaskfileError,
+    BokuVariableError,
+)
 from boku.logger import logger
-from boku.utils import yaml_suffixer
+from boku.utils import TASK_SCHEMA, edit_file, yaml_suffixer
 
 __version__ = "0.2.0"
 
@@ -45,7 +50,7 @@ class Boku:
     def run(self, args) -> None:
         """Run the taskfile."""
         if not self.taskfile:
-            raise BokuException("No taskfile loaded")
+            raise BokuTaskfileError("No taskfile loaded")
         self.taskfile.execute_tasks()
 
 
@@ -55,9 +60,9 @@ class TaskFile:
 
     version: str = ""
     """Version of boku required to run the task file."""
-    author: str = ""
+    author: str = "Unknown"
     """Author of the task file."""
-    description: str = ""
+    description: str = "No Description"
     """Description of the purpose of the task file."""
     tasks: dict[str, "Task"] = field(default_factory=dict)
     """Dictionary of tasks."""
@@ -73,11 +78,11 @@ class TaskFile:
     def __post_init__(self):
         """Run basic checks on the taskfile."""
         if not self.taskfile_path.exists():
-            raise TaskfileError(f"Taskfile not found: {self.taskfile_path}")
+            raise BokuTaskfileError(f"Taskfile not found: {self.taskfile_path}")
         if not self.taskfile_path.is_file():
-            raise TaskfileError(f"Taskfile is not a file: {self.taskfile_path}")
+            raise BokuTaskfileError(f"Taskfile is not a file: {self.taskfile_path}")
         if self.taskfile_path.suffix not in (".yaml", ".yml"):
-            raise TaskfileError(
+            raise BokuTaskfileError(
                 f"Taskfile is not a valid YAML file: {self.taskfile_path}"
             )
         logger.debug(f"Taskfile: {self.taskfile_path.absolute()}")
@@ -117,10 +122,12 @@ class TaskFile:
             logger.info("Extracting tasks")
             tasks_yaml = self.taskfile_yaml.get("tasks", {})
             for task_name, task_config in tasks_yaml.items():
+                # task = Task.from_dict(task_config)
+                # self.tasks[task_name] = task
                 self.tasks[task_name] = Task(name=task_name, **task_config)
                 logger.debug(f"Task: {task_name}")
         except yaml.YAMLError as e:
-            raise TaskfileError(f"Error parsing taskfile: {e}")
+            raise BokuTaskfileError(f"Error parsing taskfile: {e}")
 
     def execute_tasks(self) -> None:
         """Execute tasks from the task file."""
@@ -131,9 +138,7 @@ class TaskFile:
                 logger.info(f"Task {name} depends on {task.depends_on}")
                 for dependency in task.depends_on:
                     if not self.tasks.get(dependency):
-                        logger.error(f"Dependency {dependency} not found")
-                        deps_ok = False
-                        break
+                        raise BokuDependencyError(f"Dependency {dependency} not found")
                     if not self.tasks[dependency].run_ok:
                         logger.error(
                             f"Task {name} depends on {dependency}, which failed"
@@ -183,6 +188,18 @@ class Task:
     on_failure: str = ""
     """Optional. Command to run on failure."""
 
+    def __post_init__(self):
+        self._is_valid_task()
+
+    def _is_valid_task(self) -> None:
+        """Check whether the task is valid."""
+        from jsonschema import validate
+
+        try:
+            validate(self.__dict__, TASK_SCHEMA)
+        except Exception as e:
+            raise BokuTaskError(f"Task {self.name} is invalid:\n{e}")
+
     def execute(self, variables: dict[str, Any]) -> None:
         """Execute the task command.
 
@@ -201,7 +218,7 @@ class Task:
                 )
                 iter_list = self.variables.get(self.iterate, [])
                 if not iter_list:
-                    raise BokuException(f"Variable {self.iterate} not found")
+                    raise BokuVariableError(f"Variable {self.iterate} not found")
                 self.iterate = iter_list
             logger.info(f"Iterating over {len(self.iterate)} items")
             for item in self.iterate:
@@ -217,6 +234,7 @@ class Task:
             execution_results.append(success)
             outputs.append(output)
         self.output = "\n".join(outputs)
+        logger.debug(self.output)
         self.run_ok = all(execution_results)
         self.post_execute(self.run_ok)
 
@@ -304,11 +322,13 @@ class VariableParser:
             var_name = match.group(2)
             if is_env_var:
                 if var_name not in self.environment:
-                    raise ValueError(f"Environment variable '{var_name}' not found")
+                    raise BokuVariableError(
+                        f"Environment variable '{var_name}' not found"
+                    )
                 return str(self.environment.get(var_name))
             else:
                 if var_name not in self.variables:
-                    raise ValueError(f"Variable '{var_name}' not found")
+                    raise BokuVariableError(f"Variable '{var_name}' not found")
                 return str(self.variables[var_name])
 
         return re.sub(pattern, replace_var, str(text))
@@ -316,6 +336,10 @@ class VariableParser:
 
 class ConfigurationHandler:
     """Handle boku config file."""
+
+    DEFAULT_CONFIG = f"""
+    # Boku config - version {__version__}
+    """
 
     _instance = None
 
@@ -356,9 +380,19 @@ class ConfigurationHandler:
         config_dir.mkdir(parents=True, exist_ok=True)
         return config_dir
 
-    def default_config(self) -> None:
+    def get_config_file(self) -> Path:
+        """Return config file path."""
+        config_path = self.config_dir / "config.yml"
+        if not config_path.exists():
+            self.default_config(config_path)
+        return config_path
+
+    def default_config(self, config_path: Path) -> str:
         """Write default configuration to file."""
-        pass
+        logger.debug(f"Config file {config_path} doesn't exist. Creating default.")
+        config_path.touch()
+        config_path.write_text(self.DEFAULT_CONFIG.strip())
+        return ""
 
 
 class GlobalTasks:
@@ -372,17 +406,19 @@ class GlobalTasks:
         }
         """Dictionary of file stem -> task path."""
 
-    def add(self, args) -> None:
+    def add(self, args: Namespace) -> None:
         """Add a global task from a local file.
 
         Args:
             args: Namespace object from argparse.
         """
         if not args.file:
-            raise BokuException("No file specified")
+            raise BokuTaskfileError("No file specified")
         taskfile = TaskFile(taskfile_path=Path(args.file))
         if taskfile.taskfile_path.stem in self.global_tasks.keys():
-            raise BokuException(f"Task {args.file} already exists in global tasks.")
+            raise BokuTaskfileError(
+                f"Taskfile {args.file} already exists in global tasks."
+            )
         print(f"{taskfile.description}\nby {taskfile.author}")
         proceed = input("Add global task? [y/N]: ").lower().strip() == "y"
         if proceed:
@@ -393,9 +429,8 @@ class GlobalTasks:
             print(f"Task copied to {return_path}")
 
     def remove(self, args: Namespace) -> None:
-        # TODO: Add task removal.
         if not args.file:
-            raise BokuException("No file specified")
+            raise BokuTaskfileError("No file specified")
         if args.file in self.global_tasks.keys():
             logger.debug(f"Taskfile {args.file} found in global tasks.")
             taskfile_path: Path = self.global_tasks.get(args.file)
@@ -403,7 +438,7 @@ class GlobalTasks:
                 taskfile_path.unlink()
                 print(f"Taskfile {taskfile_path} deleted.")
         else:
-            raise BokuException(f"Taskfile {args.file} not found in global tasks.")
+            raise BokuTaskfileError(f"Taskfile {args.file} not found in global tasks.")
 
     @staticmethod
     def edit(args) -> None:
@@ -414,16 +449,15 @@ class GlobalTasks:
         """
         ch = ConfigurationHandler()
         global_tasks = {task.name: task for task in ch.global_task_dir.glob("*.y*ml")}
-        editor = os.environ.get("EDITOR", "vim")
         if not args.file:
             p = Picksy(list(global_tasks.values()))
             logger.debug(f"Choice: {p.get_choice()}")
-            os.execvp(editor, [editor, str(p.get_choice())])
+            edit_file(str(p.get_choice()))
         else:
             taskfile = yaml_suffixer(args.file)
             for name, task in global_tasks.items():
                 if taskfile == name:
-                    os.execvp(editor, [editor, str(task)])
+                    edit_file(str(task))
 
     def _list(self, args: Namespace) -> None:
         """List all global tasks.
@@ -431,6 +465,7 @@ class GlobalTasks:
         Args:
             args: Namespace object from argparse.
         """
+        print("Tasks available globally:")
         for task in self.global_tasks.keys():
             print(task)
 
@@ -441,11 +476,10 @@ class GlobalTasks:
             args: Namespace object from argparse.
         """
         for name, task in self.global_tasks.items():
-            print(f"{name}")
             if args.file == name:
                 logger.debug(f"Global taskfile: {task}")
                 boku = Boku()
                 boku.load_taskfile(task)
                 boku.run(args)
                 return
-        raise BokuException(f"Task {args.file} not found in global tasks.")
+        raise BokuTaskfileError(f"Taskfile {args.file} not found in global tasks.")

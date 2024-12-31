@@ -6,13 +6,25 @@ class BokuException(Exception):
         super().__init__(self.message)
 
 
-class TaskfileError(BokuException):
+class BokuTaskfileError(BokuException):
     """Raised when there are issues with the taskfile"""
 
     pass
 
 
-class TaskError(BokuException):
+class BokuTaskError(BokuException):
     """Raised when there are issues with task execution"""
+
+    pass
+
+
+class BokuDependencyError(BokuException):
+    """Task dependency errors"""
+
+    pass
+
+
+class BokuVariableError(BokuException):
+    """Variable resolution errors"""
 
     pass

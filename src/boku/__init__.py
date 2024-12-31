@@ -1,5 +1,3 @@
-from boku.cli import run
+from boku.cli import main
 
-
-def main() -> None:
-    run()
+__all__ = ["main"]

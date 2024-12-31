@@ -2,10 +2,15 @@ version: 0.0.1
 description: Testing task
 author: Paul Glushak <paul@glushak.net>
 
+variables:
+  greeting: "hello"
 tasks:
   hello:
-    run: echo "Hello World"
+    run: echo "${greeting} World"
     save_output: hello
+
+  loltask:
+    run: echo "This would pass"
 
   again:
     depends_on:

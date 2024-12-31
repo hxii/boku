@@ -1,6 +1,8 @@
 # UTILS
 #
 
+from pathlib import Path
+
 
 def frame(message: str, padding: int = 2) -> str:
     """Decorative frame around a message"""
@@ -27,6 +29,40 @@ def yaml_suffixer(taskfile: str) -> str:
         return f"{taskfile}.yaml"
     return taskfile
 
+
+def edit_file(file: str | Path) -> None:
+    """Edit a file with $EDITOR (or vim)."""
+    from os import environ, execvp
+
+    editor = environ.get("EDITOR", "vim")
+    execvp(editor, [editor, file])
+
+
+TASK_SCHEMA = {
+    "type": "object",
+    "properties": {
+        "description": {"type": "string"},
+        "run": {"type": "string"},
+        "working_dir": {"type": "string"},
+        "save_output": {"type": "string"},
+        "iterate": {
+            "anyOf": [
+                {"type": "string"},
+                {"type": "array", "items": {"type": "string"}},
+            ]
+        },
+        "depends_on": {
+            "anyOf": [
+                {"type": "string"},
+                {"type": "array", "items": {"type": "string"}},
+            ]
+        },
+        "success_code": {"type": "integer"},
+        "on_success": {"type": "string"},
+        "on_failure": {"type": "string"},
+    },
+    "required": ["run"],
+}
 
 HELPERS_YAML = """
 helpers:

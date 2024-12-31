@@ -1,16 +1,15 @@
 [project]
 name = "boku"
 version = "0.1.0"
-description = "Add your description here"
+description = "Simple, sequential YAML task runner"
 readme = "README.md"
-authors = [
-    { name = "Paul Glushak", email = "paul@glushak.net" }
-]
-requires-python = ">=3.13"
+authors = [{ name = "Paul Glushak", email = "paul@glushak.net" }]
+requires-python = ">=3.12"
 dependencies = [
-    "packaging>=24.2",
-    "picksy>=0.1.0",
-    "pyyaml>=6.0.2",
+  "jsonschema>=4.23.0",
+  "packaging>=24.0",
+  "picksy>=0.1.0",
+  "pyyaml>=6.0.0",
 ]
 
 [project.scripts]
@@ -19,3 +18,6 @@ boku = "boku:main"
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
+
+[dependency-groups]
+dev = ["mypy>=1.14.0", "ruff>=0.8.4"]

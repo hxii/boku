@@ -16,6 +16,16 @@ The idea was (and remains) to create a simple tool that I can personally use to 
 It's NOT meant to be a replacement to other, much better and more sophisticated tools, but rather a simple
 solution to a simple problem with little to no learning curve, hence a simple YAML based syntax.
 
+## Installation
+
+You can easily install/run boku via tools like `pipx` or `uv`:
+
+- Via `pipx`: `pipx install https://git.sr.ht/~hxii/boku/archive/0.2.0.tar.gz`.
+- Via `uv`: `uv tool install https://git.sr.ht/~hxii/boku/archive/0.2.0.tar.gz`.
+
+!!! Note
+    I will figure out a brew formula for this at some point.
+
 ## Features
 
 - Configure tasks as YAML files.
@@ -85,10 +95,12 @@ variables:
     - "list"
     - "of"
     - "items"
+  my_secret_var: "A totally secret value"
 
 tasks: # Dict of tasks
   prerequisite_task:
     description: "Dummy task"
+    run: "true"
   my_task:
     description: "Optional description of the task"
     run: echo "{}" # The command to run.
@@ -108,4 +120,7 @@ tasks: # Dict of tasks
     run: |
       echo "${my_task}" | tr -d '\n'
       echo "We can also use multiline commands"
+  my_secret_task:
+    run: 'echo "We can also hide secret variables with the @ symbol: @{my_secret_var}"'
+    suppress_output: true
 ```

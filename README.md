@@ -1,6 +1,6 @@
 # Boku
 
-![Boku Logo]("boku.png")
+![Boku Logo](boku.png)
 
 ## What is this?
 

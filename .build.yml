@@ -1,0 +1,39 @@
+image: alpine/edge
+packages:
+  - python3
+  - py3-pip
+  - uv
+  - make
+  - hut
+sources:
+  - https://git.sr.ht/~hxii/boku
+tasks:
+  - setup: |
+      cd boku
+      uv venv
+      uv sync --dev
+  - lint: |
+      cd boku
+      make check
+  - test: |
+      cd boku
+      make test
+  - build: |
+      cd boku
+      make build
+  - release: |
+      cd boku
+      if [ -n "$TAG" ]; then
+        # Create release on sourcehut
+        hut git create-release \
+          --tag "$TAG" \
+          --title "Boku $TAG" \
+          --files dist/*.whl \
+          git.sr.ht/~hxii/boku
+      fi
+secrets:
+  - 4182e030-48da-4ad4-b8b6-a6b61445475b
+triggers:
+  - action: email
+    condition: always
+    to: builds@0xff.nu

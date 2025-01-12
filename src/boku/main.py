@@ -7,7 +7,9 @@ from dataclasses import dataclass, field
 from datetime import datetime
 from pathlib import Path
 from typing import Any
+from textwrap import dedent
 
+import jsonschema
 import yaml
 from packaging.version import Version
 from picksy import Picksy
@@ -32,7 +34,6 @@ class Boku:
         logger.info("Getting environment variables")
         self.environment = os.environ.copy()
         logger.debug(f"Environment: {self.environment}")
-        pass
 
     def load_taskfile(self, taskfile: str | Path) -> int:
         """Load a taskfile from the system.
@@ -92,6 +93,16 @@ class TaskFile:
         logger.debug(f"Size: {self.taskfile_path.stat().st_size}")
         logger.debug(f"Owner: {self.taskfile_path.owner()}")
         self.parse_taskfile()
+
+    def __str__(self) -> str:
+        return dedent(f"""
+        Author: {self.author}
+        Tasks ({len(self.tasks)}): {", ".join(self.tasks.keys())}
+        Variables ({len(self.variables)}): {", ".join(self.variables.keys())}
+
+        Description:
+        {self.description}
+        """)
 
     def parse_taskfile(self) -> None:
         """Parse the taskfile and populate tasks and variables."""
@@ -155,7 +166,7 @@ class TaskFile:
                     logger.error(
                         f"Will not save output because variable {task.save_output} already exists."
                     )
-                    return
+                    continue
                 self.variables[task.save_output] = task.output
 
 
@@ -177,9 +188,11 @@ class Task:
     """Optional. Working directory for the command. Default: current directory."""
     save_output: str = ""
     """Optional. Save the output of the command to a variable."""
+    suppress_output: bool = False
+    """Optional. Suppress output of the command."""
     iterate: str | list[str] = field(default_factory=list)
     """Optional. Iterate over a list of items."""
-    depends_on: str | list[str] = field(default_factory=list)
+    depends_on: list[str] = field(default_factory=list)
     """Optional. List of tasks that need to succeed for this task to run."""
     success_code: int = 0
     """Optional. The expected return code for a successful command. Default: 0."""
@@ -197,8 +210,10 @@ class Task:
 
         try:
             validate(self.__dict__, TASK_SCHEMA)
-        except Exception as e:
-            raise BokuTaskError(f"Task {self.name} is invalid:\n{e}")
+        except jsonschema.ValidationError as e:
+            raise BokuTaskError(f"Task {self.name} is invalid:\n{e.message}")
+        if not self.run:
+            raise BokuTaskError(f"Task {self.name} has no command to run")
 
     def execute(self, variables: dict[str, Any]) -> None:
         """Execute the task command.
@@ -211,6 +226,7 @@ class Task:
             logger.info(f"Description: {self.description}")
         execution_results: list[bool] = []
         outputs = []
+        variable_parser = VariableParser(self.variables)
         if self.iterate:
             if isinstance(self.iterate, str):
                 logger.debug(
@@ -222,19 +238,24 @@ class Task:
                 self.iterate = iter_list
             logger.info(f"Iterating over {len(self.iterate)} items")
             for item in self.iterate:
-                command = VariableParser(self.variables).parse(f"{self.run} {item}")
-                logger.info(f"Command: {command}")
+                if "{}" in self.run:
+                    masked_command = variable_parser.parse(self.run.format(item), True)
+                    command = variable_parser.parse(self.run.format(item))
+                else:
+                    masked_command = variable_parser.parse(f"{self.run} {item}", True)
+                    command = variable_parser.parse(f"{self.run} {item}")
+                logger.info(f"Command: {masked_command}")
                 success, output = self.run_command(command)
                 execution_results.append(success)
                 outputs.append(output)
         else:
-            command = VariableParser(self.variables).parse(self.run)
-            logger.info(f"Command: {command}")
+            masked_command = variable_parser.parse(self.run, True)
+            command = variable_parser.parse(self.run)
+            logger.info(f"Command: {masked_command}")
             success, output = self.run_command(command)
             execution_results.append(success)
             outputs.append(output)
         self.output = "\n".join(outputs)
-        logger.debug(self.output)
         self.run_ok = all(execution_results)
         self.post_execute(self.run_ok)
 
@@ -243,6 +264,7 @@ class Task:
             True: self.on_success,
             False: self.on_failure,
         }
+        # NOTE: No support for variables. Yet.
         if (handler := handlers.get(success)) and handler:
             logger.info(f"Running post-execute handler: {handler}")
             self.run_command(handler)
@@ -255,13 +277,12 @@ class Task:
         """
         command_output: list[str] = []
         try:
-            logger.debug(f"Running command {command}")
             process = subprocess.Popen(
                 command,
                 shell=True,
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE,
-                cwd=self.working_dir,
+                cwd=Path(self.working_dir).expanduser(),
                 text=True,  # Return strings instead of bytes
                 bufsize=1,  # Line buffered
                 universal_newlines=True,
@@ -272,8 +293,8 @@ class Task:
                 output = process.stdout.readline()
                 if self.save_output:
                     command_output.append(output.strip())
-                if output:
-                    logger.debug(output.strip())
+                if not self.suppress_output:
+                    logger.info(output.strip())
                 error = process.stderr.readline()
                 if error:
                     logger.error(error.strip())
@@ -303,33 +324,44 @@ class VariableParser:
         self.variables = variables
         self.environment = os.environ.copy()
 
-    def parse(self, text: str | list[str]) -> str | list[str]:
+    def parse(
+        self, text: str | list[str], mask_sensitive: bool = True
+    ) -> str | list[str]:
         """Parse ${var} references in strings/lists.
 
         Args:
             text (str|list[str]): Text to parse.
+            mask_sensitive (bool): Mask sensitive variables.
 
         Returns:
             str|list[str]: Parsed text.
         """
         if isinstance(text, list):
-            return [self.parse(item) for item in text]
+            return [self.parse(item, mask_sensitive) for item in text]
 
-        pattern = r"\${(env:)?([^}]+)}"
+        # TODO: Add support for a secret variable that can be hidden from logs.
+        # e.g. ${secret:password}
+        pattern = r"(\@|\$)\{(env:)?([^}]+)\}"
 
         def replace_var(match: re.Match) -> str:
-            is_env_var = match.group(1) is not None
-            var_name = match.group(2)
+            is_sensitive = match.group(1) == "@"
+            is_env_var = match.group(2) is not None
+            var_name = match.group(3)
             if is_env_var:
                 if var_name not in self.environment:
                     raise BokuVariableError(
                         f"Environment variable '{var_name}' not found"
                     )
-                return str(self.environment.get(var_name))
+                value = str(self.environment.get(var_name))
+                # return str(self.environment.get(var_name))
             else:
                 if var_name not in self.variables:
                     raise BokuVariableError(f"Variable '{var_name}' not found")
-                return str(self.variables[var_name])
+                value = str(self.variables[var_name])
+                # return str(self.variables[var_name])
+            if is_sensitive:
+                return "****"
+            return value
 
         return re.sub(pattern, replace_var, str(text))
 
@@ -374,8 +406,8 @@ class ConfigurationHandler:
                 base = os.path.expanduser(
                     os.environ.get("XDG_CONFIG_HOME", "~/.config")
                 )
-                config_dir = Path(base) / "boku"
-                logger.debug(f"Using default config dir: {config_dir}")
+            config_dir = Path(base) / "boku"
+            logger.debug(f"Using default config dir: {config_dir}")
 
         config_dir.mkdir(parents=True, exist_ok=True)
         return config_dir
@@ -459,7 +491,7 @@ class GlobalTasks:
                 if taskfile == name:
                     edit_file(str(task))
 
-    def _list(self, args: Namespace) -> None:
+    def list_tasks(self, args: Namespace) -> None:
         """List all global tasks.
 
         Args:

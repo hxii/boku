@@ -4,7 +4,14 @@ __pycache__/
 build/
 dist/
 wheels/
+.coverage
 *.egg-info
 
 # Virtual environments
 .venv
+
+# Unrelated Project files
+*.yml
+*.yaml
+!.build.yml
+!.pre-commit-config.yaml

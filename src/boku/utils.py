@@ -51,12 +51,7 @@ TASK_SCHEMA = {
                 {"type": "array", "items": {"type": "string"}},
             ]
         },
-        "depends_on": {
-            "anyOf": [
-                {"type": "string"},
-                {"type": "array", "items": {"type": "string"}},
-            ]
-        },
+        "depends_on": {"type": "array", "items": {"type": "string"}},
         "success_code": {"type": "integer"},
         "on_success": {"type": "string"},
         "on_failure": {"type": "string"},

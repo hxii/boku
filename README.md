@@ -8,6 +8,7 @@ was to create a lightweight tool that can help me with recurring tasks without w
 to achieve this.
 
 ## Why?
+
 The idea was (and remains) to create a simple tool that I can personally use to automate simple tasks
 (with some added benefits like dependencies) without having to write code (either bash or python) to achieve this.
 It's NOT meant to be a replacement to other, much better and more sophisticated tools, but rather a simple
@@ -27,6 +28,7 @@ solution to a simple problem with little to no learning curve, hence a simple YA
 - Save output to variables via `save_output: variable_name`.
 - Use variables with `${variable_name}`.
 - Use environment variables with `${env:ENV_VAR}`.
+- Use sensitive variables with `@{variable_name}` or `@{env:secret_env_var}`, which will not print the value in logs.
 - Iterate on multiple values via:
 
   ```YAML
@@ -35,7 +37,7 @@ solution to a simple problem with little to no learning curve, hence a simple YA
       iterate:
         - ~/dev/boku2/*.tmp
         - ~/dev/cache_dev/
-      run: rm -r
+      run: rm -r {}
   ```
 
 - Simple dependencies via:
@@ -45,7 +47,7 @@ solution to a simple problem with little to no learning curve, hence a simple YA
     my_first_task:
       run: brew update
     my_second_task:
-      depends_on: brew upgrade
+      depends_on: my_first_task
       run: brew upgrade
   ```
 
@@ -63,3 +65,44 @@ solution to a simple problem with little to no learning curve, hence a simple YA
       - chat_id
       - message
   ```
+- TODO: Allow reading tasks from STDIN or URL.
+- TODO: Allow `boku global install` from URL.
+
+## Full Schema
+
+```YAML
+version: 0.1.0 # Boku version
+author: Paul Glushak <hxii@0xff.nu> # Author information
+description: This is the description of the task file.
+
+variables:
+  my_first_var: "A string value"
+  my_second_var: 80085
+  my_third_var:
+    - "list"
+    - "of"
+    - "items"
+
+tasks: # Dict of tasks
+  prerequisite_task:
+    description: "Dummy task"
+  my_task:
+    description: "Optional description of the task"
+    run: echo "{}" # The command to run.
+    # If `iterate` is used, the iteration will replace `{}` or be appended to the command.
+    working_dir: "~"
+    save_output: my_task # Variable name to save the output to
+    iterate: my_third_var # List of items to iterate over.
+    # Str evaluates to a variable.
+    depends_on: # List of successful tasks that this task depends on.
+      - prerequisite_task
+    success_code: 0 # Which return code do we consider successful
+    on_success: echo "Done!" # Command to run if successful
+    on_failure: echo "Oh no!" # Command to run if failed
+  my_final_task:
+    depends_on:
+      - my_task
+    run: |
+      echo "${my_task}" | tr -d '\n'
+      echo "We can also use multiline commands"
+```

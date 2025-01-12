@@ -45,7 +45,7 @@ def setup_parser():
     )
 
     global_list = global_subparsers.add_parser("list", help="List global tasks")
-    global_list.set_defaults(func=lambda args: gt._list(args))
+    global_list.set_defaults(func=lambda args: gt.list_tasks(args))
 
     global_add = global_subparsers.add_parser("add", help="Add a global task")
     global_add.add_argument("file", help="YAML task file to add globally", type=str)
@@ -95,6 +95,10 @@ def setup_parser():
     )
     run_parser.add_argument("file", help="A valid YAML task file", type=str)
 
+    # -- Info command
+    info_parser = subparsers.add_parser("info", help="Show task information/help")
+    info_parser.add_argument("file", help="A valid YAML task file", type=str)
+
     return parser
 
 
@@ -104,12 +108,17 @@ def run_command(args: argparse.Namespace):
     logger.set_verbose(args.verbose or 0)
     logger.debug(f"Arguments: {args}")
     if "arg" in args:
-        task_args = dict(args.arg) if args.arg else {}
+        # TODO: This is not working yet.
+        _ = dict(args.arg) if args.arg else {}
     try:
         if args.command == "run":
             boku = Boku()
             boku.load_taskfile(args.file)
             boku.run(args)
+        elif args.command == "info":
+            boku = Boku()
+            boku.load_taskfile(args.file)
+            print(boku.taskfile)
         else:
             args.func(args)
     except KeyboardInterrupt:

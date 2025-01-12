@@ -17,6 +17,7 @@ class Logger:
         self.color_output = not os.environ.get("NO_COLOR") or True
         self.logger = logging.getLogger("boku")
         self.logger.setLevel(logging.WARNING)
+        self.logger.propagate = False
         self.simple_format = "%(message)s"
         self.verbose_format = "%(asctime)s - %(name)s - %(levelname)s - %(caller_filename)s:%(caller_lineno)d - %(message)s"
         console_handler = logging.StreamHandler()
@@ -45,7 +46,7 @@ class Logger:
             self.logger.setLevel(logging.WARNING)
 
     def is_verbose(self) -> bool:
-        return self.logger.getEffectiveLevel() == logging.DEBUG
+        return self.logger.getEffectiveLevel() <= logging.DEBUG
 
     def header(self, message: str) -> None:
         """Display a formatted header message."""

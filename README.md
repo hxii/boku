@@ -1,5 +1,7 @@
 # Boku
 
+![Boku Logo]("boku.png")
+
 ## What is this?
 
 Boku (僕, servant from Japanese) is a simple, sequential YAML task runner written in Python.
@@ -65,6 +67,7 @@ solution to a simple problem with little to no learning curve, hence a simple YA
       - chat_id
       - message
   ```
+
 - TODO: Allow reading tasks from STDIN or URL.
 - TODO: Allow `boku global install` from URL.
 

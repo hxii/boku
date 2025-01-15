@@ -1,6 +1,6 @@
 [project]
 name = "boku"
-version = "0.1.0"
+version = "0.2.0"
 description = "Simple, sequential YAML task runner"
 readme = "README.md"
 authors = [{ name = "Paul Glushak", email = "paul@glushak.net" }]
@@ -21,9 +21,9 @@ build-backend = "hatchling.build"
 
 [dependency-groups]
 dev = [
-    "mypy>=1.14.0",
-    "pytest>=8.3.4",
-    "pytest-cov>=6.0.0",
-    "pytest-mock>=3.14.0",
-    "ruff>=0.8.4",
+  "mypy>=1.14.0",
+  "pytest>=8.3.4",
+  "pytest-cov>=6.0.0",
+  "pytest-mock>=3.14.0",
+  "ruff>=0.8.4",
 ]

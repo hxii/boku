@@ -14,4 +14,5 @@ wheels/
 *.yml
 *.yaml
 !.build.yml
+!demotask.yml
 !.pre-commit-config.yaml

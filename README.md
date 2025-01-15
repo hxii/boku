@@ -66,16 +66,26 @@ You can easily install/run boku via tools like `pipx` or `uv`:
 - Set success return code via `success_code: 1`.
 - Run command `on_success`.
 - Run command `on_failure`.
-- TODO: Global helper wrappers, e.g.:
+- Configure global helper wrappers under `~/.config/boku/helpers.yml`, e.g.:
 
-  ```YAML
-  helpers:
-  - name: telegram_message
-    command: "curl -X POST https://api.telegram.org/bot<token>/sendMessage -d 'chat_id=<chat_id>&text=<message>'"
+  ```yaml
+  osx_notification:
+    usage: Show a macOS notification using osascript by passing the title and message
+    run: osascript -e 'display notification "{message}" with title "{title}"'
     args:
-      - token
-      - chat_id
+      - title
       - message
+  ```
+
+- Use global helpers:
+
+  ```yaml
+  tasks:
+    send_success_notification:
+      use: osx_notification
+      with_arguments:
+        title: My notification
+        message: Hello from Boku!
   ```
 
 - TODO: Allow reading tasks from STDIN or URL.

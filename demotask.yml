@@ -15,6 +15,10 @@ tasks: # Dict of tasks
   prerequisite_task:
     description: "Dummy task"
     run: "true"
+    use: osx_notification
+    with_arguments:
+      title: Hello from Boku!
+      message: 🤷‍♂️
   my_task:
     description: "Optional description of the task"
     run: echo "{}" # The command to run.

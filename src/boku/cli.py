@@ -2,7 +2,8 @@ import argparse
 
 from boku.exceptions import BokuException
 from boku.logger import logger
-from boku.main import Boku, ConfigurationHandler, GlobalTasks, __version__
+from boku.main import Boku, GlobalTasks, __version__
+from boku.config import ConfigurationHandler
 from boku.utils import edit_file, frame
 
 

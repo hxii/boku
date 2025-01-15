@@ -55,21 +55,26 @@ TASK_SCHEMA = {
         "success_code": {"type": "integer"},
         "on_success": {"type": "string"},
         "on_failure": {"type": "string"},
+        "use": {"type": "string"},
+        "with_arguments": {"type": "object"},
     },
     "required": ["run"],
 }
 
-HELPERS_YAML = """
-helpers:
-    ntfy:
-        description: Send a notification to a NTFY host
-        run: |
-            curl \
-            -H "Authorization: Bearer <token>" \
-            -d "<message>" \
-            <host>
-        args:
-            - token
-            - message
-            - host
-  """
+HELPER_SCHEMA = {
+    "type": "object",
+    "properties": {
+        "usage": {"type": "string"},
+        "run": {"type": "string"},
+        "args": {
+            "type": "array",
+            "items": {
+                "oneOf": [
+                    {"type": "string"},
+                    {"type": "object", "additionalProperties": {"type": "string"}},
+                ]
+            },
+        },
+    },
+    "required": ["usage", "run", "args"],
+}

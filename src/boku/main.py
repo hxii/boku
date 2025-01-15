@@ -20,10 +20,11 @@ from boku.exceptions import (
     BokuTaskfileError,
     BokuVariableError,
 )
+from boku.helpers import Helper, HelperHandler
+from boku.config import ConfigurationHandler
 from boku.logger import logger
 from boku.utils import TASK_SCHEMA, edit_file, yaml_suffixer
-
-__version__ = "0.2.0"
+from boku import __version__
 
 
 class Boku:
@@ -200,6 +201,11 @@ class Task:
     """Optional. Command to run on success."""
     on_failure: str = ""
     """Optional. Command to run on failure."""
+    # helpers
+    use: str = ""
+    """Optional. Helper to use."""
+    with_arguments: dict[str, Any] = field(default_factory=dict)
+    """Optional. Arguments to pass to the helper."""
 
     def __post_init__(self):
         self._is_valid_task()
@@ -255,6 +261,12 @@ class Task:
             success, output = self.run_command(command)
             execution_results.append(success)
             outputs.append(output)
+        if self.use:
+            helper_handler = HelperHandler()
+            helper: Helper | None = helper_handler.helpers.get(self.use)
+            if not helper:
+                raise BokuVariableError(f"Helper {self.use} not found")
+            helper.execute(**self.with_arguments)
         self.output = "\n".join(outputs)
         self.run_ok = all(execution_results)
         self.post_execute(self.run_ok)
@@ -364,67 +376,6 @@ class VariableParser:
             return value
 
         return re.sub(pattern, replace_var, str(text))
-
-
-class ConfigurationHandler:
-    """Handle boku config file."""
-
-    DEFAULT_CONFIG = f"""
-    # Boku config - version {__version__}
-    """
-
-    _instance = None
-
-    def __new__(cls) -> "ConfigurationHandler":
-        """Singleton class."""
-        if cls._instance is None:
-            cls._instance = super(ConfigurationHandler, cls).__new__(cls)
-            cls._instance.__init__()
-        return cls._instance
-
-    def __init__(self) -> None:
-        """Initialize ConfigurationHandler."""
-        self.config_dir = self.get_config_dir()
-        self.global_task_dir = self.config_dir / "tasks"
-        self.global_task_dir.mkdir(exist_ok=True)
-
-    def get_config_dir(self) -> Path:
-        """Get config directory for boku.
-
-        Returns:
-            (Path) path of the config directory.
-        """
-        if os.environ.get("BOKU_CONFIG_DIR"):
-            config_dir = Path(os.environ.get("BOKU_CONFIG_DIR", "")).expanduser()
-            logger.debug(f"Using BOKU_CONFIG_DIR env var: {config_dir}")
-        else:
-            if os.name == "nt":  # Windows
-                base = os.environ.get("APPDATA") or os.path.expanduser(
-                    "~\\AppData\\Roaming"
-                )
-            else:  # Unix-like systems (Linux, macOS)
-                base = os.path.expanduser(
-                    os.environ.get("XDG_CONFIG_HOME", "~/.config")
-                )
-            config_dir = Path(base) / "boku"
-            logger.debug(f"Using default config dir: {config_dir}")
-
-        config_dir.mkdir(parents=True, exist_ok=True)
-        return config_dir
-
-    def get_config_file(self) -> Path:
-        """Return config file path."""
-        config_path = self.config_dir / "config.yml"
-        if not config_path.exists():
-            self.default_config(config_path)
-        return config_path
-
-    def default_config(self, config_path: Path) -> str:
-        """Write default configuration to file."""
-        logger.debug(f"Config file {config_path} doesn't exist. Creating default.")
-        config_path.touch()
-        config_path.write_text(self.DEFAULT_CONFIG.strip())
-        return ""
 
 
 class GlobalTasks:

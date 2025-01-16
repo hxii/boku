@@ -134,8 +134,6 @@ class TaskFile:
             logger.info("Extracting tasks")
             tasks_yaml = self.taskfile_yaml.get("tasks", {})
             for task_name, task_config in tasks_yaml.items():
-                # task = Task.from_dict(task_config)
-                # self.tasks[task_name] = task
                 self.tasks[task_name] = Task(name=task_name, **task_config)
                 logger.debug(f"Task: {task_name}")
         except yaml.YAMLError as e:
@@ -351,8 +349,6 @@ class VariableParser:
         if isinstance(text, list):
             return [self.parse(item, mask_sensitive) for item in text]
 
-        # TODO: Add support for a secret variable that can be hidden from logs.
-        # e.g. ${secret:password}
         pattern = r"(\@|\$)\{(env:)?([^}]+)\}"
 
         def replace_var(match: re.Match) -> str:
@@ -365,12 +361,10 @@ class VariableParser:
                         f"Environment variable '{var_name}' not found"
                     )
                 value = str(self.environment.get(var_name))
-                # return str(self.environment.get(var_name))
             else:
                 if var_name not in self.variables:
                     raise BokuVariableError(f"Variable '{var_name}' not found")
                 value = str(self.variables[var_name])
-                # return str(self.variables[var_name])
             if is_sensitive:
                 return "****"
             return value
@@ -412,6 +406,11 @@ class GlobalTasks:
             print(f"Task copied to {return_path}")
 
     def remove(self, args: Namespace) -> None:
+        """Remove a global task.
+
+        Args:
+            args: Namespace object from argparse.
+        """
         if not args.file:
             raise BokuTaskfileError("No file specified")
         if args.file in self.global_tasks.keys():

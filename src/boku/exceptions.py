@@ -28,3 +28,9 @@ class BokuVariableError(BokuException):
     """Variable resolution errors"""
 
     pass
+
+
+class BokuHelperError(BokuException):
+    """Helper errors"""
+
+    pass

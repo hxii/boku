@@ -26,17 +26,21 @@ tasks:
       make build
   - release: |
       cd boku
-      if [ "$BUILD_REASON" = "tag" ]; then
-        # Get the tag name associated with the current commit
-        TAG=$(git describe --tags --exact-match)
-        # Create release on SourceHut
-        hut git create-release \
-          --tag "$TAG" \
-          --title "Boku $TAG" \
-          --files dist/*.whl \
-          git.sr.ht/~hxii/boku
+      if [[ "$GIT_REF" == refs/tags/* ]]; then
+        TAG=${GIT_REF#refs/tags/}
+        if [[ -n "$TAG" ]]; then
+          echo "Build triggered by tag: $TAG"
+          hut git create-release \
+            --tag "$TAG" \
+            --title "Boku $TAG" \
+            --files dist/*.whl \
+            git.sr.ht/~hxii/boku
+        else
+          echo "Error: Empty tag name extracted from GIT_REF: $GIT_REF"
+        fi
       else
         echo "Build not triggered by a tag. Skipping release."
+        echo "GIT_REF: $GIT_REF"
       fi
 secrets:
   - 4182e030-48da-4ad4-b8b6-a6b61445475b

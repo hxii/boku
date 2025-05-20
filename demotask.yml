@@ -10,6 +10,9 @@ variables:
     - "of"
     - "items"
   my_secret_var: "A totally secret value"
+  environment: "development"
+  debug: "true"
+  enable_feature: "false"
 
 tasks: # Dict of tasks
   prerequisite_task:
@@ -37,3 +40,36 @@ tasks: # Dict of tasks
   my_secret_task:
     run: 'echo "We can also hide secret variables with the @ symbol: @{my_secret_var}"'
     suppress_output: true
+
+  # Conditional task examples
+  conditional_platform:
+    description: "This task only runs on macOS"
+    if: '[ "$(uname)" = "Darwin" ]'
+    run: echo "Running on macOS!"
+
+  debug_mode_task:
+    description: "Only runs when debug is enabled"
+    if: '[ "${debug}" = "true" ]'
+    run: echo "Debug mode is active"
+
+  production_task:
+    description: "Only runs in production environment"
+    if: '[ "${environment}" = "production" ]'
+    run: echo "Deploying to production..."
+    on_success: echo "Production deployment successful!"
+
+  complex_conditional:
+    description: "Task with multiple conditions"
+    if: |
+      [ "${debug}" = "true" ] && [ "${environment}" = "development" ]
+    run: echo "Running in development debug mode"
+
+  file_check:
+    description: "Only runs if README.md exists"
+    if: "test -f README.md"
+    run: echo "README.md exists!"
+
+  disabled_feature:
+    description: "Example of a disabled feature"
+    if: '[ "${enable_feature}" = "true" ]'
+    run: echo "This feature is enabled"

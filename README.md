@@ -29,6 +29,7 @@ You can easily install/run boku via tools like `pipx` or `uv`:
 ## Features
 
 - Configure tasks as YAML files.
+- Conditional tasks via `if`, e.g. `if: test -f README.md`
 - Pass in arguments via `-a key value`.
 - Pre-set variables via:
 
@@ -66,16 +67,23 @@ You can easily install/run boku via tools like `pipx` or `uv`:
 - Set success return code via `success_code: 1`.
 - Run command `on_success`.
 - Run command `on_failure`.
-- Configure global helper wrappers under `~/.config/boku/helpers.yml`, e.g.:
+- Configure global helper wrappers in `~/.config/boku/helpers.yml`
+- Preset helpers are configured by default:
+  - `notify` - Cross-platform system notifications
+  - `notify_kitten` - Send notifications to via KittyTerm's Kitten utility
+  - `download` - Download a file from a URL via `wget`
+  - `http_get` - Make HTTP requests and process responses
+  - `git_clone` - Clone git repositories with optional target directory
 
-  ```yaml
-  osx_notification:
-    usage: Show a macOS notification using osascript by passing the title and message
-    run: osascript -e 'display notification "{message}" with title "{title}"'
-    args:
-      - title
-      - message
-  ```
+  - Example of using the HTTP helper:
+
+    ```YAML
+    notify_test:
+      use: notify
+      with_arguments:
+        title: Hello from boku!
+        message: Hello world!
+    ```
 
 - Use global helpers:
 

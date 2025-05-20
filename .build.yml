@@ -7,6 +7,8 @@ packages:
   - hut
 sources:
   - https://git.sr.ht/~hxii/boku
+artifacts:
+  - dist/*.whl
 tasks:
   - setup: |
       cd boku
@@ -40,4 +42,4 @@ secrets:
 triggers:
   - action: email
     condition: always
-    to: builds@0xff.nu
+    to: hxii+builds@0xff.nu

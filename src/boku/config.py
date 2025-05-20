@@ -1,6 +1,10 @@
-from boku import __version__
-from pathlib import Path
 import os
+from pathlib import Path
+from typing import Any
+
+import yaml
+
+from boku import __version__
 from boku.logger import logger
 
 
@@ -37,13 +41,9 @@ class ConfigurationHandler:
             logger.debug(f"Using BOKU_CONFIG_DIR env var: {config_dir}")
         else:
             if os.name == "nt":  # Windows
-                base = os.environ.get("APPDATA") or os.path.expanduser(
-                    "~\\AppData\\Roaming"
-                )
+                base = os.environ.get("APPDATA") or os.path.expanduser("~\\AppData\\Roaming")
             else:  # Unix-like systems (Linux, macOS)
-                base = os.path.expanduser(
-                    os.environ.get("XDG_CONFIG_HOME", "~/.config")
-                )
+                base = os.path.expanduser(os.environ.get("XDG_CONFIG_HOME", "~/.config"))
             config_dir = Path(base) / "boku"
             logger.debug(f"Using default config dir: {config_dir}")
 
@@ -63,3 +63,19 @@ class ConfigurationHandler:
         config_path.touch()
         config_path.write_text(self.DEFAULT_CONFIG.strip())
         return ""
+
+    def validate_config(self) -> tuple[bool, dict[str, Any]]:
+        """Validate configuration file.
+
+        Returns:
+            tuple[bool, dict]: (is_valid, config_data)
+              - is_valid: True if config is valid YAML, False otherwise
+              - config_data: The parsed config data (empty dict if invalid)
+        """
+        try:
+            config_path = self.get_config_file()
+            config_data = yaml.safe_load(config_path.read_text()) or {}
+            return True, config_data
+        except yaml.YAMLError as e:
+            logger.error(f"Config file {config_path} is not a valid YAML file: {e}")
+            return False, {}

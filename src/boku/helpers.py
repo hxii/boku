@@ -6,26 +6,7 @@ import jsonschema
 from boku.logger import logger
 from boku.exceptions import BokuHelperError
 from boku.config import ConfigurationHandler
-from boku.utils import HELPER_SCHEMA
-
-DUMMY_HELPER = """telegram_message:
-  usage: |
-    Pass the following args:
-    - token - Your bot token, which you can get via BotFather https://telegram.me/botfather
-    - chat_id - The chat ID to send the message to
-    - message - The message to send
-  run: "curl -X POST https://api.telegram.org/bot{token}/sendMessage -d 'chat_id={chat_id}&text={message}'"
-  args:
-    - token
-    - chat_id
-    - message
-osx_notification:
-  usage: Show a macOS notification using osascript by passing the title and message
-  run: osascript -e 'display notification "{message}" with title "{title}"'
-  args:
-    - title
-    - message
-"""
+from boku.utils import HELPER_SCHEMA, HELPER_TEMPLATE
 
 
 @dataclass
@@ -58,7 +39,16 @@ class Helper:
         if not self.run:
             raise BokuHelperError(f"Helper {self.name} has no command to run")
 
-    def execute(self, **kwargs):
+    def execute(self, executor, **kwargs) -> bool:
+        """Execute the helper with the provided arguments using the given executor.
+
+        Args:
+            executor: CommandExecutor instance to use for running the command.
+            **kwargs: Arguments to format the helper command.
+
+        Returns:
+            bool: True if executed successfully, False otherwise
+        """
         logger.info(f"Executing helper {self.name}...")
         for key, value in kwargs.items():
             if key in ["usage", "command", "args"]:
@@ -67,14 +57,10 @@ class Helper:
             setattr(self, key, value)
             logger.debug(f"Set {key} to {value}...")
         command = self.run.format(**self.__dict__)
-        self.run_command(command)
+        result = executor.execute(command=command)
+        return result.success
 
-    def run_command(self, command: str) -> None:
-        """Run a command."""
-        from subprocess import run, PIPE
-
-        logger.debug(f"Running helper command: {command}")
-        run(command, shell=True, stdout=PIPE, stderr=PIPE)
+    # Removed run_command; now handled by CommandExecutor
 
 
 class HelperHandler:
@@ -100,13 +86,13 @@ class HelperHandler:
         logger.debug("Parsing helpers...")
         helpers_yaml = yaml.safe_load(self.helper_file.read_text())
         for helper_name, helper in helpers_yaml.items():
-            self.helpers[helper_name] = Helper(name=helper_name, **helper)
+            # Make sure to provide all required parameters for the Helper class
+            # Create a new Helper instance with explicit parameters to satisfy the type checker
+            self.helpers[helper_name] = Helper(
+                name=helper_name, usage=helper.get("usage", ""), run=helper.get("run", ""), args=helper.get("args", [])
+            )
             logger.debug(f"Helper {helper_name} parsed successfully.")
         pass
 
     def create_empty_helper_file(self) -> int:
-        return (
-            self.helper_file.write_text(DUMMY_HELPER.strip())
-            if not self.helper_file.exists()
-            else 0
-        )
+        return self.helper_file.write_text(HELPER_TEMPLATE.strip()) if not self.helper_file.exists() else 0

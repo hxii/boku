@@ -19,8 +19,10 @@ class Logger:
         self.logger.setLevel(logging.WARNING)
         self.logger.propagate = False
         self.simple_format = "%(message)s"
-        self.verbose_format = "%(asctime)s - %(name)s - %(levelname)s - %(caller_filename)s:%(caller_lineno)d - %(message)s"
-        console_handler = logging.StreamHandler()
+        self.verbose_format = (
+            "%(asctime)s - %(name)s - %(levelname)s - %(caller_filename)s:%(caller_lineno)d - %(message)s"
+        )
+        console_handler = logging.StreamHandler()  # type: ignore
         formatter = self.ColoredFormatter(
             self.simple_format,
             self.color_output,
@@ -35,9 +37,7 @@ class Logger:
     def set_verbose(self, verbosity: int) -> None:
         """Set verbosity level."""
         if verbosity >= 2:
-            self.logger.handlers[0].setFormatter(
-                self.ColoredFormatter(self.verbose_format, self.color_output)
-            )
+            self.logger.handlers[0].setFormatter(self.ColoredFormatter(self.verbose_format, self.color_output))
         if verbosity == 1:
             self.logger.setLevel(logging.INFO)
         elif verbosity >= 2:
@@ -51,9 +51,7 @@ class Logger:
     def header(self, message: str) -> None:
         """Display a formatted header message."""
         if self.color_output:
-            header = (
-                f"\n{self.Colors.BOLD}{self.Colors.BLUE}{message}{self.Colors.RESET}\n"
-            )
+            header = f"\n{self.Colors.BOLD}{self.Colors.BLUE}{message}{self.Colors.RESET}\n"
         else:
             header = f"\n{message}\n"
 
@@ -63,10 +61,12 @@ class Logger:
         """Internal method to handle logging with caller info."""
         extra = {}
         if self.is_verbose():
-            caller_frame = inspect.currentframe().f_back.f_back
-            filename = os.path.basename(caller_frame.f_code.co_filename)
-            lineno = caller_frame.f_lineno
-            extra = {"caller_filename": filename, "caller_lineno": lineno}
+            current_frame = inspect.currentframe()
+            if current_frame and current_frame.f_back and current_frame.f_back.f_back:
+                caller_frame = current_frame.f_back.f_back
+                filename = os.path.basename(caller_frame.f_code.co_filename)
+                lineno = caller_frame.f_lineno
+                extra = {"caller_filename": filename, "caller_lineno": lineno}
         self.logger.log(level, message, extra=extra)
 
     def info(self, message: str) -> None:
@@ -89,21 +89,15 @@ class Logger:
         def format(self, record: logging.LogRecord):
             if self.color_output:
                 if record.levelno == logging.WARNING:
-                    record.msg = (
-                        f"{Logger.Colors.YELLOW}{record.msg}{Logger.Colors.RESET}"
-                    )
+                    record.msg = f"{Logger.Colors.YELLOW}{record.msg}{Logger.Colors.RESET}"
                 elif record.levelno == logging.ERROR:
                     record.msg = f"{Logger.Colors.RED}{record.msg}{Logger.Colors.RESET}"
                 elif record.levelno == logging.DEBUG:
-                    record.msg = (
-                        f"{Logger.Colors.BLUE}{record.msg}{Logger.Colors.RESET}"
-                    )
+                    record.msg = f"{Logger.Colors.BLUE}{record.msg}{Logger.Colors.RESET}"
                 elif record.levelno == logging.CRITICAL:
                     record.msg = f"{Logger.Colors.BOLD}{Logger.Colors.RED}{record.msg}{Logger.Colors.RESET}"
                 elif record.levelno == logging.INFO:
-                    record.msg = (
-                        f"{Logger.Colors.GREEN}{record.msg}{Logger.Colors.RESET}"
-                    )
+                    record.msg = f"{Logger.Colors.GREEN}{record.msg}{Logger.Colors.RESET}"
             return super().format(record)
 
 

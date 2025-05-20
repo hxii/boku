@@ -27,7 +27,7 @@ bad_schema_helper:
   run: "echo {invalid}"
   args:
     - arg1: 2
-    - arg2: 
+    - arg2:
       - 2
 """
 
@@ -74,9 +74,7 @@ def test_helper_bad_schema():
 def test_helper_handler_load_helpers(temp_helpers_file):
     handler = HelperHandler()
     # Mock the ConfigurationHandler to return the temporary helpers file
-    with patch.object(
-        ConfigurationHandler, "get_config_dir", return_value=temp_helpers_file.parent
-    ):
+    with patch.object(ConfigurationHandler, "get_config_dir", return_value=temp_helpers_file.parent):
         handler = HelperHandler()
     assert "telegram_message" in handler.helpers
     helper = handler.helpers["telegram_message"]

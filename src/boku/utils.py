@@ -11,14 +11,14 @@ def frame(message: str, padding: int = 2) -> str:
     longest_line = max(len(line) for line in message_lines)
     straight_length = longest_line + padding * 2
     lines = [
-        f"{chars[5]}{' ' * padding}{line.strip().center(longest_line)}{' '*padding}{chars[5]}"
+        f"{chars[5]}{' ' * padding}{line.strip().center(longest_line)}{' ' * padding}{chars[5]}"
         for line in message_lines
     ]
     _message = [
-        f"{chars[0]}{chars[4]*straight_length}{chars[1]}",
+        f"{chars[0]}{chars[4] * straight_length}{chars[1]}",
     ]
     _message.extend(lines)
-    _message.append(f"{chars[2]}{chars[4]*straight_length}{chars[3]}")
+    _message.append(f"{chars[2]}{chars[4] * straight_length}{chars[3]}")
     messages = "\n".join(_message)
     return messages
 
@@ -37,6 +37,62 @@ def edit_file(file: str | Path) -> None:
     editor = environ.get("EDITOR", "vim")
     execvp(editor, [editor, file])
 
+
+TASKFILE_TEMPLATE = """# Boku taskfile
+version: 0.2.2
+author: Boku <hxii@0xff.nu>
+description: This is a template taskfile.
+
+tasks:
+  task:
+    description: This is a task.
+    run: echo "Hello, world!"
+"""
+
+HELPER_TEMPLATE = """
+notify:
+  usage: "Show a system notification (works on macOS, Linux with notify-send)"
+  run: |
+    if command -v osascript >/dev/null; then
+      osascript -e 'display alert "{title}" message "{message}"'
+    elif command -v notify-send >/dev/null; then
+      notify-send "{title}" "{message}"
+    else
+      echo "{title}: {message}"
+    fi
+  args:
+    - title
+    - message
+notify_kitten:
+  usage: "Send a notification with {title} and {message} via KittyTerm's Kitten utility"
+  run: 'kitten notify "{title}" {message}'
+  args:
+    - title
+    - message
+download:
+  usage: "Download {url} to the current directory using wget"
+  run: "wget {url} {flags}"
+  args:
+    - url
+    - flags
+http_get:
+  usage: "Make an HTTP GET request and display the response"
+  run: "curl -s {headers} {url}"
+  args:
+    - url
+    - headers
+brew:
+  usage: "Install a brew package by specifying the package name"
+  run: "brew install {package}"
+  args:
+    - package
+git_clone:
+  usage: "Clone a git repository. Repo is URL, dir is optional target directory."
+  run: "git clone {repo} {dir}"
+  args:
+    - repo
+    - dir
+"""
 
 TASK_SCHEMA = {
     "type": "object",
@@ -57,6 +113,7 @@ TASK_SCHEMA = {
         "on_failure": {"type": "string"},
         "use": {"type": "string"},
         "with_arguments": {"type": "object"},
+        "if": {"type": "string"},
     },
     "required": ["run"],
 }

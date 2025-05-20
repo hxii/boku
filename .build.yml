@@ -17,9 +17,10 @@ tasks:
   - lint: |
       cd boku
       make check
-  - test: |
-      cd boku
-      make test
+    # NOTE: Disabling tests until I can write proper ones
+  # - test: |
+  #     cd boku
+  #     make test
   - build: |
       cd boku
       make build

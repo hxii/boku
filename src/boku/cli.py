@@ -23,9 +23,7 @@ def setup_parser():
         epilog=epilog,
     )
     parser.add_argument("-v", "--verbose", action="count", help="Verbose output.")
-    parser.add_argument(
-        "-V", "--version", action="version", version=f"%(prog)s {__version__}"
-    )
+    parser.add_argument("-V", "--version", action="version", version=f"%(prog)s {__version__}")
     parser.add_argument(
         "-q",
         "--quiet",
@@ -53,9 +51,7 @@ def setup_parser():
 
     # -- Global command group
     global_parser = subparsers.add_parser("global", help="Interact with global tasks")
-    global_subparsers = global_parser.add_subparsers(
-        dest="global_command", required=True
-    )
+    global_subparsers = global_parser.add_subparsers(dest="global_command", required=True)
 
     global_list = global_subparsers.add_parser("list", help="List global tasks")
     global_list.set_defaults(func=lambda args: GlobalTasks(args).list_tasks())
@@ -64,9 +60,7 @@ def setup_parser():
     global_add.add_argument("file", help="YAML task file to add globally", type=str)
     global_add.set_defaults(func=lambda args: GlobalTasks(args).add())
 
-    global_run = global_subparsers.add_parser(
-        "run", help="Run a global task", parents=[shared_parser]
-    )
+    global_run = global_subparsers.add_parser("run", help="Run a global task", parents=[shared_parser])
     global_run.add_argument("file", help="Global task to run", type=str)
     global_run.set_defaults(func=lambda args: GlobalTasks(args).run())
 
@@ -75,9 +69,7 @@ def setup_parser():
     global_edit.set_defaults(func=lambda args: GlobalTasks(args).edit())
 
     global_remove = global_subparsers.add_parser("remove", help="Remove a global task")
-    global_remove.add_argument(
-        "file", help="YAML task file to remove", type=str, nargs="?"
-    )
+    global_remove.add_argument("file", help="YAML task file to remove", type=str, nargs="?")
     global_remove.set_defaults(func=lambda args: GlobalTasks(args).remove())
 
     # -- Config command
@@ -85,9 +77,7 @@ def setup_parser():
     config_parser.set_defaults(func=lambda args: edit_file(ch.get_config_file()))
 
     # -- Run command
-    run_parser = subparsers.add_parser(
-        "run", help="Run a task file", parents=[shared_parser]
-    )
+    run_parser = subparsers.add_parser("run", help="Run a task file", parents=[shared_parser])
     run_parser.add_argument(
         "-c",
         "--check-only",
@@ -100,9 +90,7 @@ def setup_parser():
         action="store_true",
         help="Only show task text, omitting the output.",
     )
-    run_parser.add_argument(
-        "--trust", action="store_true", help="Trust STDIN taskfiles"
-    )
+    run_parser.add_argument("--trust", action="store_true", help="Trust STDIN taskfiles")
     run_parser.add_argument("file", help="A valid YAML task file", type=str)
 
     # -- Info command

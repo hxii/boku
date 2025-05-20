@@ -8,7 +8,7 @@ packages:
 sources:
   - https://git.sr.ht/~hxii/boku
 artifacts:
-  - dist/*.whl
+  - dist/boku.whl
 tasks:
   - setup: |
       cd boku
@@ -24,22 +24,20 @@ tasks:
   - build: |
       cd boku
       make build
+      mv dist/*.whl dist/boku.whl
   - release: |
       cd boku
       if [[ "$GIT_REF" == refs/tags/* ]]; then
         TAG=${GIT_REF#refs/tags/}
         if [[ -n "$TAG" ]]; then
           echo "Build triggered by tag: $TAG"
-          hut git create-release \
-            --tag "$TAG" \
-            --title "Boku $TAG" \
-            --files dist/*.whl \
-            git.sr.ht/~hxii/boku
+          hut git artifact upload dist/boku.whl --rev $TAG
         else
           echo "Error: Empty tag name extracted from GIT_REF: $GIT_REF"
+          exit 1
         fi
       else
-        echo "Build not triggered by a tag. Skipping release."
+        echo "Build not triggered by a tag. Skipping upload."
         echo "GIT_REF: $GIT_REF"
       fi
 secrets:

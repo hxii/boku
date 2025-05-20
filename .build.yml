@@ -42,6 +42,7 @@ tasks:
       fi
 secrets:
   - 4182e030-48da-4ad4-b8b6-a6b61445475b
+oauth: git.sr.ht/OBJECTS:RW
 triggers:
   - action: email
     condition: always

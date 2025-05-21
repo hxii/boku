@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.2.3 - 2025-05-21
+
+### Fixes
+
+- Prevent `HelperHandler` from running `__init__` method multiple times
+- Only save output of a command if it is not empty
+
 ## [0.2.2] - 2025-05-20
 
 ### New Features

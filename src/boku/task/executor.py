@@ -61,20 +61,26 @@ class CommandExecutor:
             while True:
                 output = ""
                 error = ""
+
                 if process.stdout is not None:
                     line = process.stdout.readline()  # type: ignore
                     if line is not None:
                         output = line
-                if save_output:
+
+                if save_output and output:
                     command_output.append(output.strip())
-                if not suppress_output:
+
+                if not suppress_output and output:
                     logger.info(output.strip())
+
                 if process.stderr is not None:
                     line = process.stderr.readline()  # type: ignore
                     if line is not None:
                         error = line
+
                 if error:
                     logger.error(error.strip())
+
                 # Break if process is done and no more output
                 if output == "" and error == "" and process.poll() is not None:
                     break

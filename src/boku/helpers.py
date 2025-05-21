@@ -1,11 +1,11 @@
 from dataclasses import dataclass
 
-import yaml
 import jsonschema
+import yaml
 
-from boku.logger import logger
-from boku.exceptions import BokuHelperError
 from boku.config import ConfigurationHandler
+from boku.exceptions import BokuHelperError
+from boku.logger import logger
 from boku.utils import HELPER_SCHEMA, HELPER_TEMPLATE
 
 
@@ -65,6 +65,8 @@ class Helper:
 
 class HelperHandler:
     _instance = None
+    _initialized = False
+    helpers: dict[str, Helper] = {}
 
     def __new__(cls) -> "HelperHandler":
         """Singleton pattern."""
@@ -73,23 +75,26 @@ class HelperHandler:
         return cls._instance
 
     def __init__(self):
-        self.ch = ConfigurationHandler()
-        self.helper_file = self.ch.get_config_dir() / "helpers.yml"
-        self.helpers: dict[str, Helper] = {}
-        logger.debug(f"Helper file: {self.helper_file}")
-        if not self.helper_file.exists():
-            logger.debug("Helper file doesn't exist, creating...")
-            self.create_empty_helper_file()
-        self.parse_helpers()
+        if not HelperHandler._initialized:
+            self.ch = ConfigurationHandler()
+            self.helper_file = self.ch.get_config_dir() / "helpers.yml"
+            self.helpers = {}
+            logger.debug(f"Helper file: {self.helper_file}")
+            if not self.helper_file.exists():
+                logger.debug("Helper file doesn't exist, creating...")
+                self.create_empty_helper_file()
+            self.parse_helpers()
+            HelperHandler._initialized = True
 
     def parse_helpers(self):
         logger.debug("Parsing helpers...")
         helpers_yaml = yaml.safe_load(self.helper_file.read_text())
         for helper_name, helper in helpers_yaml.items():
-            # Make sure to provide all required parameters for the Helper class
-            # Create a new Helper instance with explicit parameters to satisfy the type checker
             self.helpers[helper_name] = Helper(
-                name=helper_name, usage=helper.get("usage", ""), run=helper.get("run", ""), args=helper.get("args", [])
+                name=helper_name,
+                usage=helper.get("usage", ""),
+                run=helper.get("run", ""),
+                args=helper.get("args", []),
             )
             logger.debug(f"Helper {helper_name} parsed successfully.")
         pass

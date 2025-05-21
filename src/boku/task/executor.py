@@ -70,7 +70,7 @@ class CommandExecutor:
                 if save_output and output:
                     command_output.append(output.strip())
 
-                if not suppress_output:
+                if not suppress_output and output:
                     logger.info(output.strip())
 
                 if process.stderr is not None:

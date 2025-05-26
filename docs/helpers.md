@@ -1,6 +1,6 @@
 # Helpers
 
-[← Back to README](/README.md)
+[← Back to README](README.md)
 
 Helpers, which are located in `~/.config/boku/helpers.yml`, are globally available "shortcuts" that your task can utilize to perform common or repeating operations within your taskfile.
 

@@ -34,12 +34,12 @@ You can easily install/run boku via tools like `pipx` or `uv`:
 !!! IMPORTANT
     Configuration is yet to be implemented. Sorry!
 
-See configuration documentation [here](/docs/configuration.md).
+See configuration documentation [here](docs/configuration.md).
 
 ## Documentation
 
-- [Taskfiles](/docs/taskfiles.md)
-- [Tasks](/docs/tasks.md)
-- [Helpers](/docs/helpers.md)
-- [Variables](/docs/variables.md)
-- [Arguments](/docs/arguments.md) - This is not working yet.
+- [Taskfiles](docs/taskfiles.md)
+- [Tasks](docs/tasks.md)
+- [Helpers](docs/helpers.md)
+- [Variables](docs/variables.md)
+- [Arguments](docs/arguments.md) - This is not working yet.

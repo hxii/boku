@@ -1,13 +1,13 @@
 # Taskfiles
 
-[← Back to README](/README.md)
+[← Back to README](README.md)
 
 Taskfiles in Boku are defined as `YAML` files, and can have either `.yml` or `.yaml` suffix.
 
 There are two kinds of taskfiles, that only differ in their availability.
 
 - Local - taskfiles located in your current working directory.
-- Global - globally available taskfiles located in the `tasks` directory within `boku`'s [configuration directory](/docs/configuration.md).
+- Global - globally available taskfiles located in the `tasks` directory within `boku`'s [configuration directory](docs/configuration.md).
 
 Global taskfiles are just a convenience, so you can, of course, run either taskfile type if you provide the absolute path to it.
 

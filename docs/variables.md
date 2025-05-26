@@ -1,6 +1,6 @@
 # Variables
 
-[← Back to README](README.md)
+[← Back to README](../README.md)
 
 Variables are define in the `variables` section of a taskfile, and are defined as a dictionary of key-value pairs.
 

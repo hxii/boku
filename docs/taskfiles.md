@@ -1,6 +1,6 @@
 # Taskfiles
 
-[← Back to README](README.md)
+[← Back to README](../README.md)
 
 Taskfiles in Boku are defined as `YAML` files, and can have either `.yml` or `.yaml` suffix.
 

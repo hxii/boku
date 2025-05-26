@@ -1,6 +1,6 @@
 # Tasks
 
-[← Back to README](README.md)
+[← Back to README](../README.md)
 
 Tasks are define in the `tasks` section of a taskfile, and are defined as a dictionary of key-value pairs.
 The only *required* key is `run`, which specifies the command to run.

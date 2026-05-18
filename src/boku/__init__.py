@@ -1,4 +1,3 @@
-__version__ = "0.2.0"
-from boku.cli import main
+from importlib.metadata import version
 
-__all__ = ["main"]
+__version__ = version("boku")

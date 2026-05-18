@@ -1,0 +1,8 @@
+version: 0.2.3
+author: Paul (hxii) Glushak
+description: Run brew updates
+tasks:
+  brew_update:
+    run: brew update
+  brew_upgrade:
+    run: brew upgrade

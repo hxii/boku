@@ -15,6 +15,8 @@ class BokuArgs(argparse.Namespace):
     check_only: bool = False
     text_only: bool = False
     trust: bool = False
+    working_dir: str | None = None
+    """Working directory for task execution."""
 
     def is_dry_run(self) -> bool:
         """Check if this is a dry run."""

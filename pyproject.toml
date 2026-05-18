@@ -1,15 +1,15 @@
 [project]
 name = "boku"
-version = "0.2.3"
+version = "0.2.4"
 description = "Simple, sequential YAML task runner"
 readme = "README.md"
 authors = [{ name = "Paul Glushak", email = "paul@glushak.net" }]
 requires-python = ">=3.12"
 dependencies = [
-  "jsonschema>=4.23.0",
-  "packaging>=24.0",
+  "jsonschema>=4.25.0",
+  "packaging>=26.0",
   "picksy>=0.1.0",
-  "pyyaml>=6.0.0",
+  "pyyaml>=6.0.3",
 ]
 
 [project.scripts]
@@ -31,7 +31,7 @@ dev = [
 [tool.ruff]
 line-length = 120
 indent-width = 4
-target-version = "py39"
+target-version = "py312"
 
 [tool.ruff.lint]
 select = ["E4", "E7", "E9", "F"]
@@ -53,11 +53,9 @@ reportUnusedCallResult = "none"
 [tool.pycodestyle]
 max-line-length = 120
 
-[tool.ty]
-respect-ignore-files = true
-
 [tool.ty.src]
 root = "./src"
+respect-ignore-files = true
 
 [tool.ty.rules]
 unused-ignore-comment = "warn"

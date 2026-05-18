@@ -39,6 +39,8 @@ class TaskFile:
     """Variables to be used in tasks."""
     args: Optional[BokuArgs] = None
     """Command line arguments."""
+    working_dir: Path = field(default_factory=Path)
+    """Working directory for task execution (defaults to taskfile's parent)."""
 
     def __post_init__(self):
         """Run basic checks on the taskfile."""
@@ -52,6 +54,9 @@ class TaskFile:
         logger.debug(f"Modified: {datetime.fromtimestamp(self.taskfile_path.stat().st_mtime)}")
         logger.debug(f"Size: {self.taskfile_path.stat().st_size}")
         logger.debug(f"Owner: {self.taskfile_path.owner()}")
+        # Set working_dir to taskfile's parent directory if not already set
+        if not self.working_dir or self.working_dir == Path():
+            self.working_dir = self.taskfile_path.absolute().parent
         self.parse_taskfile()
 
     def __str__(self) -> str:
@@ -87,6 +92,22 @@ class TaskFile:
                 logger.warning(f"Taskfile has version {self.version}, which is older than Boku version {__version__}")
             logger.info("Extracting variables")
             self.variables = self.taskfile_yaml.get("variables", {})
+            # Variable resolution for cross-references and appending
+            from boku.variables import VariableParser
+
+            def resolve_all_variables(variables):
+                parser = VariableParser(variables)
+                changed = True
+                while changed:
+                    changed = False
+                    for k, v in variables.items():
+                        parsed = parser.parse(v)
+                        if parsed != v:
+                            variables[k] = parsed
+                            changed = True
+                return variables
+
+            self.variables = resolve_all_variables(self.variables)
             logger.debug(f"Variables: {self.variables}")
             logger.info("Extracting tasks")
             tasks_yaml = self.taskfile_yaml.get("tasks", {})
@@ -94,6 +115,7 @@ class TaskFile:
                 # Map 'if' to 'if_condition' if present
                 if "if" in task_config:
                     task_config["if_condition"] = task_config.pop("if")
+                task_config.setdefault("working_dir", str(self.working_dir))
                 self.tasks[task_name] = Task(name=task_name, args=self.args, **task_config)
                 logger.debug(f"Task: {task_name}")
         except yaml.YAMLError as e:
@@ -133,3 +155,8 @@ class TaskFile:
                     logger.error(f"Will not save output because variable {task.save_output} already exists.")
                     continue
                 self.variables[task.save_output] = task.output
+
+            # Fail-fast support at the task level
+            if hasattr(task, "fail_fast") and getattr(task, "fail_fast", False) and not task.run_ok:
+                logger.error(f"Task {name} failed and fail_fast is set. Aborting further execution.")
+                break

@@ -19,6 +19,7 @@ class Boku:
         """Initialize Boku."""
         self.taskfile: TaskFile | None = None
         self.args = args
+        self.working_dir = None
         logger.info(f"Boku initialized {datetime.now()}")
         logger.info("Getting environment variables")
         self.environment = os.environ.copy()
@@ -35,6 +36,11 @@ class Boku:
         """
         logger.info(f"Loading taskfile: {taskfile}")
         self.taskfile = TaskFile(taskfile_path=Path(taskfile), args=self.args)
+        self.taskfile.working_dir = (
+            self.taskfile.taskfile_path.absolute().parent
+            if not self.args.working_dir
+            else Path(self.args.working_dir).expanduser()
+        )
         self.print_taskfile()
         return self.taskfile.taskfile_path.stat().st_size
 
@@ -44,6 +50,7 @@ class Boku:
                 dedent(
                     f"""
                             \uf15b File: {self.taskfile.taskfile_path}
+                            \uf4d4 Working Dir: {self.taskfile.working_dir}
                             \uf4ff Author: {self.taskfile.author}
                             \ue64e Description: {self.taskfile.description}""".strip("\n")
                 ),

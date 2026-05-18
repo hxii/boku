@@ -1,14 +1,17 @@
 # CommandExecutor
 #
 
-import os
 import subprocess
+import sys
 from collections import namedtuple
 from pathlib import Path
-from typing import Any
+from typing import Any, TYPE_CHECKING
 
 from boku.logger import logger
 from boku.models import BokuArgs
+
+if TYPE_CHECKING:
+    from boku.task import Task
 
 Result = namedtuple("Result", ["success", "output"])
 
@@ -16,14 +19,15 @@ Result = namedtuple("Result", ["success", "output"])
 class CommandExecutor:
     """Handles command execution for tasks."""
 
-    def __init__(self, args: BokuArgs) -> None:
+    def __init__(self, args: BokuArgs, executing_task: "Task") -> None:
         self.results: list[Result] = []
         self.args = args
+        self.executing_task = executing_task
 
     def execute(
         self,
         command: str,
-        working_dir: str = os.getcwd(),
+        working_dir: str | None = None,
         success_code: int = 0,
         suppress_output: bool = False,
         save_output: bool = False,
@@ -40,8 +44,10 @@ class CommandExecutor:
         Returns:
             Result namedtuple with success status and output
         """
+        # if working_dir is None:
+        #     working_dir = self.executing_task.working_dir
         if self.args.is_dry_run():
-            logger.info(f"[DRY RUN] Would execute: {command} in {working_dir}")
+            logger.info(f"[DRY RUN] Task {self.executing_task.name} – Would execute: {command} in {working_dir}")
             return Result(success=True, output="[DRY RUN]")
 
         command_output: list[str] = []
@@ -71,6 +77,7 @@ class CommandExecutor:
                     command_output.append(output.strip())
 
                 if not suppress_output and output:
+                    print(output.strip())
                     logger.info(output.strip())
 
                 if process.stderr is not None:
@@ -79,6 +86,7 @@ class CommandExecutor:
                         error = line
 
                 if error:
+                    print(error.strip(), file=sys.stderr)
                     logger.error(error.strip())
 
                 # Break if process is done and no more output
@@ -94,14 +102,14 @@ class CommandExecutor:
             return result
 
         except subprocess.CalledProcessError as e:
-            logger.error(f"Command failed with exit code {e.returncode}: {command}")
+            logger.error(f"Task {self.executing_task.name} – Command failed with exit code {e.returncode}: {command}")
             result = Result(success=False, output="\n".join(command_output))
             self.results.append(result)
             return result
         except Exception as e:
             if process and process.poll() is None:
                 process.kill()
-            logger.error(f"Unexpected error executing command: {e}")
+            logger.error(f"Task {self.executing_task.name} - Unexpected error executing command: {e}")
             result = Result(success=False, output=str(e))
             self.results.append(result)
             return result
@@ -110,7 +118,7 @@ class CommandExecutor:
         self,
         command_template: str,
         items: list[Any],
-        working_dir: str = os.getcwd(),
+        working_dir: str | None = None,
         success_code: int = 0,
         suppress_output: bool = False,
         save_output: bool = False,
@@ -130,11 +138,17 @@ class CommandExecutor:
         Returns:
             List of Result namedtuples with success status and output for each iteration
         """
+        # if working_dir is None:
+        # working_dir = self.executing_task.working_dir
         iteration_results: list[Result] = []
 
         for item in items:
             if use_placeholder and "{}" in command_template:
-                command = command_template.format(item)
+                # Support multiple placeholders by unpacking if item is a list/tuple
+                if isinstance(item, (list, tuple)):
+                    command = command_template.format(*item)
+                else:
+                    command = command_template.format(item)
             else:
                 command = f"{command_template} {item}"
 

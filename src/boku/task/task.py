@@ -1,8 +1,8 @@
 # Task module
 #
+import logging
 
 from dataclasses import dataclass, field
-from pathlib import Path
 from typing import Any, cast
 
 from boku.exceptions import BokuTaskError, BokuVariableError
@@ -30,7 +30,7 @@ class Task:
     # execution
     run: str = ""
     """Command to run."""
-    working_dir: str = str(Path.cwd())
+    working_dir: str | None = None
     """Optional. Working directory for the command. Default: current directory."""
     save_output: str = ""
     """Optional. Save the output of the command to a variable."""
@@ -46,6 +46,8 @@ class Task:
     """Optional. Command to run on success."""
     on_failure: str = ""
     """Optional. Command to run on failure."""
+    fail_fast: bool = False
+    """Optional. If true, abort execution after this task fails."""
     # helpers
     use: str = ""
     """Optional. Helper to use."""
@@ -85,7 +87,7 @@ class Task:
             args: Optional arguments from command line.
         """
         if self.executor is None:
-            self.executor = CommandExecutor(self.args)
+            self.executor = CommandExecutor(self.args, executing_task=self)
 
         self.variables = variables
         if self.description:
@@ -175,14 +177,26 @@ class Task:
             self.post_execute(bool(self.run_ok))
 
     def _resolve_iteration_items(self) -> list[Any]:
-        """Resolve iteration items from string variable name or list."""
+        """Resolve iteration items from string variable name or list, with variable parsing."""
+        from boku.variables import VariableParser
+
+        variable_parser = VariableParser(self.variables)
+
+        def parse_item(item):
+            if isinstance(item, list):
+                return [parse_item(subitem) for subitem in item]
+            elif isinstance(item, str):
+                return variable_parser.parse(item)
+            else:
+                return item
+
         if isinstance(self.iterate, str):
             logger.debug(f"Iteration is string {self.iterate}, trying to get variable")
             iter_list = self.variables.get(self.iterate, [])
             if not iter_list:
                 raise BokuVariableError(f"Variable {self.iterate} not found")
-            return iter_list
-        return self.iterate
+            return [parse_item(x) for x in iter_list]
+        return [parse_item(x) for x in self.iterate]
 
     def _execute_helper(self, executor) -> None:
         """Execute a helper with the specified arguments using the provided executor."""
@@ -211,7 +225,10 @@ class Task:
         }
 
         if (handler := handlers.get(success)) and handler:
-            logger.info(f"Running post-execute handler: {handler}")
+            logger._log(
+                logging.INFO if success else logging.WARNING,
+                f"Task {self.name} - Running post-execute handler: {handler}",
+            )
             from boku.variables import VariableParser
 
             variable_parser = VariableParser(self.variables)

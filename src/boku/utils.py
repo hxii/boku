@@ -105,6 +105,7 @@ TASK_SCHEMA = {
             "anyOf": [
                 {"type": "string"},
                 {"type": "array", "items": {"type": "string"}},
+                {"type": "array", "items": {"type": "array", "items": {"type": "string"}}},
             ]
         },
         "depends_on": {"type": "array", "items": {"type": "string"}},
@@ -117,7 +118,6 @@ TASK_SCHEMA = {
     },
     "required": ["run"],
 }
-
 HELPER_SCHEMA = {
     "type": "object",
     "properties": {

@@ -8,7 +8,7 @@ from boku.helpers import HelperHandler
 from boku.logger import logger
 from boku.main import Boku, GlobalTasks
 from boku.models import BokuArgs
-from boku.utils import TASKFILE_TEMPLATE, edit_file, frame
+from boku.utils import TASKFILE_TEMPLATE, edit_file, frame, yaml_suffixer
 
 
 def setup_parser():
@@ -62,6 +62,12 @@ def setup_parser():
 
     global_run = global_subparsers.add_parser("run", help="Run a global task", parents=[shared_parser])
     global_run.add_argument("file", help="Global task to run", type=str)
+    global_run.add_argument(
+        "-w",
+        "--working-dir",
+        help="Working directory where to run the taskfile",
+        type=str,
+    )
     global_run.set_defaults(func=lambda args: GlobalTasks(args).run())
 
     global_edit = global_subparsers.add_parser("edit", help="Edit a global task")
@@ -91,6 +97,12 @@ def setup_parser():
         help="Only show task text, omitting the output.",
     )
     run_parser.add_argument("--trust", action="store_true", help="Trust STDIN taskfiles")
+    run_parser.add_argument(
+        "-w",
+        "--working-dir",
+        help="Working directory where to run the taskfile",
+        type=str,
+    )
     run_parser.add_argument("file", help="A valid YAML task file", type=str)
 
     # -- Info command
@@ -114,6 +126,8 @@ def run_command(args: BokuArgs):
         print(frame(f"boku {__version__}"))
     logger.set_verbose(args.get_verbosity())
     logger.debug(f"Arguments: {args}")
+    if args.file is not None:
+        taskfile = yaml_suffixer(args.file)
     if "arg" in args:
         # NOTE: This is not working yet.
         _ = dict(args.arg) if args.arg else {}
@@ -123,7 +137,7 @@ def run_command(args: BokuArgs):
             # We know file is not None here because it's required for run command
             if args.file:
                 assert args.file is not None  # Help type checker
-                boku.load_taskfile(str(args.file))
+                boku.load_taskfile(str(taskfile))
                 boku.run()
             else:
                 raise BokuTaskfileError("No taskfile specified")
@@ -132,7 +146,7 @@ def run_command(args: BokuArgs):
             # We know file is not None here because it's required for info command
             if args.file:
                 assert args.file is not None  # Help type checker
-                boku.load_taskfile(str(args.file))
+                boku.load_taskfile(str(taskfile))
                 print(boku.taskfile)
             else:
                 raise BokuTaskfileError("No taskfile specified")

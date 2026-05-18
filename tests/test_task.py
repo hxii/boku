@@ -2,7 +2,8 @@ import pytest
 
 from boku.exceptions import BokuTaskError, BokuTaskfileError
 from boku.logger import logger
-from boku.main import Boku, Task
+from boku.main import Boku
+from boku.task import Task
 
 
 def test_invalid_task():

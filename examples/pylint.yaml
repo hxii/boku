@@ -1,0 +1,18 @@
+version: 0.2.4
+author: Paul (hxii) Glushak
+description: Run ruff code linting and formatting
+
+tasks:
+  ensure_ruff:
+    run: command -v ruff # Making sure `ruff` is available
+    on_failure: echo "Ruff not available!" # We can run a command if the main command fails
+    # NOTE: The output from the `echo` will not be visible without `--verbose/-v`
+  ruff_lint:
+    depends_on: [ensure_ruff] # We designate the previous task as a dependency
+    run: ruff check . --fix
+  ruff_format:
+    depends_on: [ruff_lint]
+    run: ruff format .
+  confetti:
+    depends_on: [ruff_lint, ruff_format] # As `depends_on` is a list, we can designate multiple dependencies
+    run: echo "All good!"

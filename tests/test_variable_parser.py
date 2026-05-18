@@ -1,7 +1,7 @@
 import pytest
 
 from boku.exceptions import BokuVariableError
-from boku.main import VariableParser
+from boku.variables import VariableParser
 
 
 @pytest.fixture

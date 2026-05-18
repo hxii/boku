@@ -65,7 +65,6 @@ class Helper:
 
 class HelperHandler:
     _instance = None
-    _initialized = False
     helpers: dict[str, Helper] = {}
 
     def __new__(cls) -> "HelperHandler":
@@ -75,16 +74,14 @@ class HelperHandler:
         return cls._instance
 
     def __init__(self):
-        if not HelperHandler._initialized:
-            self.ch = ConfigurationHandler()
-            self.helper_file = self.ch.get_config_dir() / "helpers.yml"
-            self.helpers = {}
-            logger.debug(f"Helper file: {self.helper_file}")
-            if not self.helper_file.exists():
-                logger.debug("Helper file doesn't exist, creating...")
-                self.create_empty_helper_file()
-            self.parse_helpers()
-            HelperHandler._initialized = True
+        self.ch = ConfigurationHandler()
+        self.helper_file = self.ch.get_config_dir() / "helpers.yml"
+        self.helpers = {}
+        logger.debug(f"Helper file: {self.helper_file}")
+        if not self.helper_file.exists():
+            logger.debug("Helper file doesn't exist, creating...")
+            self.create_empty_helper_file()
+        self.parse_helpers()
 
     def parse_helpers(self):
         logger.debug("Parsing helpers...")

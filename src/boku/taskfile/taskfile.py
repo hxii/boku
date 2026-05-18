@@ -39,7 +39,7 @@ class TaskFile:
     """Variables to be used in tasks."""
     args: Optional[BokuArgs] = None
     """Command line arguments."""
-    working_dir: Path = field(default_factory=Path)
+    working_dir: Path | None = None
     """Working directory for task execution (defaults to taskfile's parent)."""
 
     def __post_init__(self):
@@ -55,21 +55,19 @@ class TaskFile:
         logger.debug(f"Size: {self.taskfile_path.stat().st_size}")
         logger.debug(f"Owner: {self.taskfile_path.owner()}")
         # Set working_dir to taskfile's parent directory if not already set
-        if not self.working_dir or self.working_dir == Path():
-            self.working_dir = self.taskfile_path.absolute().parent
+        # if not self.working_dir or self.working_dir == Path():
+        # self.working_dir = self.taskfile_path.absolute().parent
         self.parse_taskfile()
 
     def __str__(self) -> str:
-        return dedent(
-            f"""
+        return dedent(f"""
         Author: {self.author}
         Tasks ({len(self.tasks)}): {", ".join(self.tasks.keys())}
         Variables ({len(self.variables)}): {", ".join(self.variables.keys())}
 
         Description:
         {self.description}
-        """
-        )
+        """)
 
     def parse_taskfile(self) -> None:
         """Parse the taskfile and populate tasks and variables."""
@@ -115,7 +113,10 @@ class TaskFile:
                 # Map 'if' to 'if_condition' if present
                 if "if" in task_config:
                     task_config["if_condition"] = task_config.pop("if")
-                task_config.setdefault("working_dir", str(self.working_dir))
+                task_config.setdefault(
+                    "working_dir",
+                    str(self.working_dir if self.working_dir is not None else self.taskfile_path.parent),
+                )
                 self.tasks[task_name] = Task(name=task_name, args=self.args, **task_config)
                 logger.debug(f"Task: {task_name}")
         except yaml.YAMLError as e:

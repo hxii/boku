@@ -17,7 +17,7 @@ from boku.utils import TASK_SCHEMA
 class Task:
     """Task Object"""
 
-    args: BokuArgs
+    args: BokuArgs | None
     """Command line arguments."""
 
     # metadata
@@ -30,7 +30,7 @@ class Task:
     # execution
     run: str = ""
     """Command to run."""
-    working_dir: str | None = None
+    working_dir: str = ""
     """Optional. Working directory for the command. Default: current directory."""
     save_output: str = ""
     """Optional. Save the output of the command to a variable."""
@@ -97,6 +97,7 @@ class Task:
             from boku.variables import VariableParser
 
             variable_parser = VariableParser(self.variables)
+            assert self.args is not None
             parsed_condition = str(variable_parser.parse(self.if_condition))
             logger.info(f"{'Checking' if not self.args.is_dry_run() else 'Would Check'} condition: {parsed_condition}")
 
@@ -114,6 +115,7 @@ class Task:
 
         # Execute helper if no run command set
         if self.use and not self.run:
+            assert self.args is not None
             if self.args.is_dry_run():
                 logger.info(f"[DRY RUN] Would execute helper: {self.use}")
                 for key, value in self.with_arguments.items():
@@ -161,11 +163,13 @@ class Task:
                 save_output=bool(self.save_output),
             )
 
+            assert self.args is not None
             self.output = "[DRY RUN]" if self.args.is_dry_run() else result.output
             self.run_ok = True if self.args.is_dry_run() else cast(bool, result.success)
 
         # Execute helper after run command if both set
         if self.use:
+            assert self.args is not None
             if self.args.is_dry_run():
                 logger.info(f"[DRY RUN] Would execute helper: {self.use}")
                 for key, value in self.with_arguments.items():
@@ -224,6 +228,7 @@ class Task:
             False: self.on_failure,
         }
 
+        assert self.executor is not None
         if (handler := handlers.get(success)) and handler:
             logger._log(
                 logging.INFO if success else logging.WARNING,

@@ -19,7 +19,7 @@ Result = namedtuple("Result", ["success", "output"])
 class CommandExecutor:
     """Handles command execution for tasks."""
 
-    def __init__(self, args: BokuArgs, executing_task: "Task") -> None:
+    def __init__(self, args: BokuArgs | None, executing_task: "Task") -> None:
         self.results: list[Result] = []
         self.args = args
         self.executing_task = executing_task
@@ -44,8 +44,8 @@ class CommandExecutor:
         Returns:
             Result namedtuple with success status and output
         """
-        # if working_dir is None:
-        #     working_dir = self.executing_task.working_dir
+        working_dir = self.executing_task.working_dir
+        assert self.args is not None
         if self.args.is_dry_run():
             logger.info(f"[DRY RUN] Task {self.executing_task.name} – Would execute: {command} in {working_dir}")
             return Result(success=True, output="[DRY RUN]")
@@ -69,7 +69,7 @@ class CommandExecutor:
                 error = ""
 
                 if process.stdout is not None:
-                    line = process.stdout.readline()  # type: ignore
+                    line = process.stdout.readline()
                     if line is not None:
                         output = line
 
@@ -81,7 +81,7 @@ class CommandExecutor:
                     logger.info(output.strip())
 
                 if process.stderr is not None:
-                    line = process.stderr.readline()  # type: ignore
+                    line = process.stderr.readline()
                     if line is not None:
                         error = line
 
@@ -152,6 +152,7 @@ class CommandExecutor:
             else:
                 command = f"{command_template} {item}"
 
+            assert self.args is not None
             if not self.args.is_dry_run():
                 result = self.execute(
                     command=command,

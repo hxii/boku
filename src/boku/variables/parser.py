@@ -31,7 +31,14 @@ class VariableParser:
             str | list: Parsed text.
         """
         if isinstance(text, list):
-            return [self.parse(item, mask_sensitive) for item in text]
+            result: list[str] = []
+            for item in text:
+                parsed = self.parse(item, mask_sensitive)
+                if isinstance(parsed, list):
+                    result.extend(parsed)
+                else:
+                    result.append(parsed)
+            return result
 
         pattern = r"(\@|\$)\{(env:)?([^}]+)\}"
 

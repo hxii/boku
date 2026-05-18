@@ -35,16 +35,14 @@ class Boku:
             size (int): Size of the taskfile.
         """
         logger.info(f"Loading taskfile: {taskfile}")
-        self.taskfile = TaskFile(taskfile_path=Path(taskfile), args=self.args)
-        self.taskfile.working_dir = (
-            self.taskfile.taskfile_path.absolute().parent
-            if not self.args.working_dir
-            else Path(self.args.working_dir).expanduser()
-        )
+        taskfile_path = Path(taskfile)
+        working_dir = taskfile_path.parent if not self.args.working_dir else Path(self.args.working_dir).expanduser()
+        self.taskfile = TaskFile(taskfile_path=taskfile_path, working_dir=working_dir, args=self.args)
         self.print_taskfile()
         return self.taskfile.taskfile_path.stat().st_size
 
     def print_taskfile(self) -> None:
+        assert self.taskfile is not None
         if not self.args.is_quiet():
             print(
                 dedent(
@@ -96,7 +94,7 @@ class GlobalTasks:
             raise BokuTaskfileError("No file specified")
         if self.args.file in self.global_tasks.keys():
             logger.debug(f"Taskfile {self.args.file} found in global tasks.")
-            taskfile_path: Path = self.global_tasks.get(self.args.file)
+            taskfile_path: Path = self.global_tasks.get(self.args.file, Path())
             if input(f"Delete {taskfile_path}? [y/N]: ").lower().strip() == "y":
                 taskfile_path.unlink()
                 print(f"Taskfile {taskfile_path} deleted.")

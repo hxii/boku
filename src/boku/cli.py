@@ -151,7 +151,7 @@ def run_command(args: BokuArgs):
             else:
                 raise BokuTaskfileError("No taskfile specified")
         elif args.command == "new":
-            if not args.file or (isinstance(args.file, str) and args.file.strip() == ""):  # type: ignore
+            if not args.file or (isinstance(args.file, str) and args.file.strip() == ""):
                 filename = input("Enter the name of the task file (task_file.yaml): ")
                 filepath = Path().cwd() / filename
                 if filepath.exists():

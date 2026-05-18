@@ -22,7 +22,7 @@ class Logger:
         self.verbose_format = (
             "%(asctime)s - %(name)s - %(levelname)s - %(caller_filename)s:%(caller_lineno)d - %(message)s"
         )
-        console_handler = logging.StreamHandler()  # type: ignore
+        console_handler = logging.StreamHandler()
         formatter = self.ColoredFormatter(
             self.simple_format,
             self.color_output,

@@ -14,7 +14,7 @@ def frame(message: str, padding: int = 2) -> str:
         f"{chars[5]}{' ' * padding}{line.strip().center(longest_line)}{' ' * padding}{chars[5]}"
         for line in message_lines
     ]
-    _message = [
+    _message: list[str] = [
         f"{chars[0]}{chars[4] * straight_length}{chars[1]}",
     ]
     _message.extend(lines)
@@ -105,7 +105,10 @@ TASK_SCHEMA = {
             "anyOf": [
                 {"type": "string"},
                 {"type": "array", "items": {"type": "string"}},
-                {"type": "array", "items": {"type": "array", "items": {"type": "string"}}},
+                {
+                    "type": "array",
+                    "items": {"type": "array", "items": {"type": "string"}},
+                },
             ]
         },
         "depends_on": {"type": "array", "items": {"type": "string"}},

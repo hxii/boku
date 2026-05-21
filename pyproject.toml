@@ -19,6 +19,12 @@ boku = "boku.cli:main"
 requires = ["hatchling"]
 build-backend = "hatchling.build"
 
+[tool.hatch.build]
+exclude = ["web/**", ".github/**"]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/boku"]
+
 [dependency-groups]
 dev = [
   "pytest>=8.3.4",

@@ -1,5 +1,27 @@
 # Changelog
 
+## 0.2.4 - 2026-05-18
+
+### New Features
+
+- `-w`/`--working-dir` CLI flag to set working directory for task execution
+- Per-task `working_dir` support — each task can override the working directory
+- `fail_fast: true` on tasks — abort remaining tasks on first failure
+- `on_success` / `on_failure` handler commands per task
+- Variable cross-references — `${var}` inside variable values resolves against the taskfile's variable map
+- Multi-placeholder iteration — nested lists unpack into multiple `{}` placeholders in a single command
+- Variables can hold lists, flattened on resolution
+- YAML suffix will be auto-appended when using `run` without specifying `.yml`/`.yaml`, e.g. `boku run my-task`
+- Dry-run output now includes the task name
+
+### Fixes
+
+- `post_execute` logs at `INFO` on success, `WARNING` on failure (was logging stderr as ERROR)
+- Dry run tasks will be correctly marked as skipped instead of failed
+- Task output will now be saved only if it's not empty
+
+> ⚠️ Taskfile schema expanded — see `docs/taskfiles.md` and `docs/tasks.md` for updated schema.
+
 ## 0.2.3 - 2025-05-21
 
 ### Fixes
@@ -16,11 +38,11 @@
 - **Task conditionals**: Specify `if` conditions for tasks, e.g.:
 
   ```yaml
-    tasks:
-      my_task:
-        if: test -f README.md
-        run: echo "README.md exists"
-    ```
+  tasks:
+    my_task:
+      if: test -f README.md
+      run: echo "README.md exists"
+  ```
 
 - **Helper-Only Tasks**: Create tasks that use predefined helpers without needing a `run` command
 

@@ -54,9 +54,6 @@ class TaskFile:
         logger.debug(f"Modified: {datetime.fromtimestamp(self.taskfile_path.stat().st_mtime)}")
         logger.debug(f"Size: {self.taskfile_path.stat().st_size}")
         logger.debug(f"Owner: {self.taskfile_path.owner()}")
-        # Set working_dir to taskfile's parent directory if not already set
-        # if not self.working_dir or self.working_dir == Path():
-        # self.working_dir = self.taskfile_path.absolute().parent
         self.parse_taskfile()
 
     def __str__(self) -> str:

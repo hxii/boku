@@ -43,3 +43,14 @@ See configuration documentation [here](docs/configuration.md).
 - [Helpers](docs/helpers.md)
 - [Variables](docs/variables.md)
 - [Arguments](docs/arguments.md) - This is not working yet.
+
+## Skills
+
+Step-by-step guides for common patterns and features - check the `skills/` directory:
+
+- [Quick Start](skills/01-quick-start.md) - First taskfile in 5 minutes
+- [Iteration](skills/02-iteration-patterns.md) - Loop over lists
+- [Dependencies](skills/03-task-dependencies.md) - Control execution order
+- [Variables](skills/04-variables-and-secrets.md) - Cross-references
+- [Conditionals](skills/05-conditionals-and-helpers.md) - Skip and integrate
+- [Why Boku](skills/06-why-boku.md) - When to use vs other tools

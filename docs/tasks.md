@@ -2,8 +2,8 @@
 
 [← Back to README](../README.md)
 
-Tasks are define in the `tasks` section of a taskfile, and are defined as a dictionary of key-value pairs.
-The only *required* key is `run`, which specifies the command to run.
+Tasks are defined in the `tasks` section of a taskfile, and are defined as a dictionary of key-value pairs.
+The only _required_ key is `run`, which specifies the command to run.
 
 Task arguments are defined as follows:
 
@@ -11,7 +11,8 @@ Task arguments are defined as follows:
 - `run` - A string with the command to run.
 - `working_dir` - A string with the working directory to use. If not specified, the current directory is used.
 - `save_output` - A string with the name of the [variable](docs/variables.md) to save the output of `run` to.
-- `iterate` - An array of strings to iterate the `run` command over. If a string is provided, it will be considered as a variable name to iterate over.
+- `iterate` - An array of strings (or nested arrays of strings) to iterate the `run` command over. If a string is provided, it will be considered as a variable name to iterate over. Supports multiple placeholders (`{}`) when iterating nested lists.
+- `fail_fast` - A boolean. If `true`, remaining tasks are skipped when this task fails.
 - `depends_on` - An array of task names that this task depends on. The task will not run if any of the dependent tasks fail.
 - `success_code` - An integer representing the success exit code of the command. Defaults to `0`.
 - `on_success` - A string with the command to run on success.

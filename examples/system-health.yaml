@@ -1,0 +1,130 @@
+version: 0.2.4
+author: Paul (hxii) Glushak <paul@glushak.net>
+description: System health check taskfile. Runs on macOS and Linux with zero setup.
+
+variables:
+  disk_warn_pct: 80
+  clean_dirs:
+    - /tmp
+    - ~/.Trash
+  report_file: /tmp/system-report-${env:USER}.txt
+
+tasks:
+  # ═══════════════════════════════════════
+  # 1. SYSTEM INFO — simple commands
+  # ═══════════════════════════════════════
+
+  hostname:
+    description: Show the system hostname
+    run: hostname -s
+
+  os_info:
+    description: Show OS details
+    run: uname -a
+
+  uptime:
+    description: Show system uptime
+    run: |
+      echo "Uptime:"
+      uptime
+
+  # ═══════════════════════════════════════
+  # 2. DISK — save_output demonstration
+  # ═══════════════════════════════════════
+
+  disk_check:
+    description: Check root disk usage
+    run: df -h / | tail -1
+    save_output: disk_line
+
+  disk_summary:
+    description: Print disk summary
+    depends_on:
+      - disk_check
+    run: df -h / | tail -1 | awk '{print $3 " used / " $2}'
+
+  # ═══════════════════════════════════════
+  # 3. MEMORY — platform conditionals
+  # ═══════════════════════════════════════
+
+  memory_usage:
+    description: Show memory info
+    run: |
+      if [ "$(uname)" = Darwin ]; then
+        vm_stat | head -3
+      else
+        free -h
+      fi
+
+  # ═══════════════════════════════════════
+  # 4. USERS — pipe chaining
+  # ═══════════════════════════════════════
+
+  active_users:
+    description: Show who is logged in
+    run: who | awk '{print $1}' | sort -u | tr \\n ' '
+
+  # ═══════════════════════════════════════
+  # 5. CLEANUP — iterate and if
+  # ═══════════════════════════════════════
+
+  cleanup_preview:
+    description: Preview cleanup targets
+    depends_on:
+      - disk_check
+    run: |
+      for d in /tmp ~/.Trash; do
+        t=$(eval echo "$d")
+        test -d "$t" && du -sh "$t" 2>/dev/null
+      done
+    save_output: cleanup_info
+
+  do_cleanup:
+    description: Clean temp and trash dirs
+    depends_on:
+      - cleanup_preview
+    if: test -d /tmp
+    run: 'rm -rf {} 2>/dev/null; echo Cleaned'
+    iterate: clean_dirs
+    on_success: 'echo Done'
+    on_failure: 'echo Skipped'
+
+  # ═══════════════════════════════════════
+  # 6. REPORT — multiline + helpers + deps
+  # ═══════════════════════════════════════
+
+  generate_report:
+    description: Write health report to file
+    depends_on:
+      - hostname
+      - uptime
+      - disk_summary
+      - memory_usage
+      - active_users
+    run: |
+      {
+        echo "=== System Health ==="
+        echo "Host: $(hostname -s)"
+        echo "User: ${env:USER}"
+        echo "Date: $(date)"
+        echo ""
+        df -h /
+      } | tee "${report_file}"
+
+  # ═══════════════════════════════════════
+  # 7. STANDBY — no deps, standalone
+  # ═══════════════════════════════════════
+
+  quick:
+    description: Quick system overview (no deps)
+    run: |
+      echo "Host: $(hostname -s)"
+      echo "OS:   $(uname -srm)"
+      echo "Up:   $(uptime | awk -F 'up ' '{print $2}' | awk -F ',' '{print $1}')"
+      echo "Disk: $(df -h / | tail -1 | awk '{print $3}') used"
+
+  report:
+    description: Show saved report
+    depends_on:
+      - generate_report
+    run: cat "${report_file}"

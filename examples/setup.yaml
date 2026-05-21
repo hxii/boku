@@ -1,0 +1,24 @@
+# This is an example of using boku to automate system setup using
+# `brew` and `dotter`
+version: 0.2.4
+author: hxii <hxii@0xff.nu>
+description: System Configurator
+variables:
+  dots: "git.sr.ht:~hxii/dotfiles"
+  brew: /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+tasks:
+  install_brew:
+    if: "! command -v brew"
+    run: ${brew}
+  ensure_brew:
+    run: command -v brew
+  install_dotter:
+    if: "! brew list -1 | grep dotter"
+    depends_on: [ensure_brew]
+    run: brew install dotter
+  clone_dos:
+    working_dir: ~/
+    run: git clone ${dots}
+  dotter:
+    working_dir: ~/dotfiles
+    run: dotter

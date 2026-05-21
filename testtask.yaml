@@ -1,4 +1,0 @@
-author: Paul Glushak <paul@glushak.net>
-tasks:
-  hello:
-    run: echo "Hello, world!"

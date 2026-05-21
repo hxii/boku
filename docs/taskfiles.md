@@ -17,7 +17,7 @@ The goal is to have a simple structure throughout:
 
 ```yaml
 # boku-taskfile <- Used for schema manifest
-version: 0.2.3 # Version of boku the task was written for
+version: 0.2.4 # Version of boku the task was written for
 author: Your Name <your@email.com>
 description: A description of what this taskfile is for or what it does
 
@@ -25,12 +25,14 @@ variables: # A dictionary of variables
 tasks: # A dictionary of tasks
 ```
 
+Variables support cross-references to other variables in the taskfile using `${var_name}` syntax, and can hold lists (including nested lists) which are flattened during resolution.
+
 ## Example Taskfile
 
 Here's a somewhat realistic example taskfile that will use `brew` to install three packages, and notify the user when done:
 
 ```yaml
-version: 0.2.3
+version: 0.2.4
 author: hxii <hxii@email.com>
 description: A demo taskfile.
 
@@ -39,6 +41,9 @@ variables:
     - fzf
     - eza
     - uv
+  install_flags:
+    - --cask
+    - -y
 
 tasks:
   install_packages:

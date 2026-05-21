@@ -1,8 +1,14 @@
-version: 0.2.3
-author: Paul (hxii) Glushak
+# Run `brew update`, `brew upgrade` and install some packages
+version: 0.2.4
+author: hxii <hxii@0xff.nu>
 description: Run brew updates
+variables:
+  packages: [eza, bat, jq]
 tasks:
   brew_update:
     run: brew update
   brew_upgrade:
     run: brew upgrade
+  brew_packages:
+    iterate: packages
+    run: brew install {}

@@ -1,0 +1,25 @@
+version: 0.2.4
+variables:
+  vault: ~/Documents/Brain/
+  daily: ${vault}Daily/
+tasks:
+  date:
+    run: date +%Y-%m-%d
+    save_output: date
+    suppress_output: true
+  daily_obsidian:
+    if: test -f ${daily}${date}.md
+    run: cat ${daily}${date}.md | grep -E '^- \[ \]' || echo "No tasks today!"
+    save_output: daily_tasks
+    suppress_output: true
+  weather:
+    run: curl -s wttr.in/new-york?0T | base64
+    save_output: weather
+    suppress_output: true
+  day:
+    run: |
+      echo "## Weather"
+      echo "${weather}" | base64 -d
+      echo ""
+      echo "## Today's tasks"
+      echo "${daily_tasks}"

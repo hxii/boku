@@ -3,7 +3,7 @@ name = "boku"
 version = "0.2.4"
 description = "Simple, sequential YAML task runner"
 readme = "README.md"
-authors = [{ name = "Paul Glushak", email = "paul@glushak.net" }]
+authors = [{ name = "Paul Glushak (hxii)", email = "paul@glushak.net" }]
 requires-python = ">=3.12"
 dependencies = [
   "jsonschema>=4.25.0",

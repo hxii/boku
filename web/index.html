@@ -1,56 +1,85 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>boku — YAML task runner</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css">
-</head>
-<body>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>boku — YAML task runner</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <canvas id="bgCanvas"></canvas>
+    <div class="scanlines"></div>
+    <div class="vignette"></div>
 
-  <canvas id="bgCanvas"></canvas>
-  <div class="scanlines"></div>
-  <div class="vignette"></div>
+    <!-- ═══ NAME WARNING ═══ -->
+    <div class="warning-banner">
+      <span class="warning-icon">⚠️</span>
+      The <code>boku</code> package name on PyPI is currently squatted.
+      Please install with <strong><code>pip install boku2</code></strong>
+      or <code>uv tool install boku2</code> until the name is cleared.
+      <a href="https://github.com/pypi/support/issues/10729" class="warning-link">Track progress →</a>
+    </div>
 
-  <div class="page">
+    <div class="page">
+      <!-- ═══ HERO ═══ -->
+      <header class="hero">
+        <div class="prompt">
+          <span class="dollar">$</span> <span class="cmd crt-glow">boku</span>
+          <span class="dim">run</span>
+          <span class="scramble crt-glow" id="scramble">deploy</span
+          ><span class="cursor crt-glow">█</span>
+        </div>
+        <p class="tagline">
+          Write what to run. Not how. Boku reads your YAML, runs your tasks,
+          gets out of the way.
+        </p>
+        <nav class="hero-nav">
+          <a href="#install" class="pixel-btn">install</a>
+          <a href="https://git.sr.ht/~hxii/boku" class="pixel-btn">source</a>
+          <a
+            href="https://asciinema.org/a/IFzd7KtoQtGOAL18ZZVEy49eq"
+            class="pixel-btn"
+            >demo</a
+          >
+        </nav>
+      </header>
 
-    <!-- ═══ HERO ═══ -->
-    <header class="hero">
-      <div class="prompt"><span class="dollar">$</span> <span class="cmd crt-glow">boku</span> <span class="dim">run</span> <span class="scramble crt-glow" id="scramble">deploy</span><span class="cursor crt-glow">█</span></div>
-      <p class="tagline">Write what to run. Not how. Boku reads your YAML, runs your tasks, gets out of the way.</p>
-      <nav class="hero-nav">
-        <a href="#install" class="pixel-btn">install</a>
-        <a href="https://git.sr.ht/~hxii/boku" class="pixel-btn">source</a>
-        <a href="https://asciinema.org/a/IFzd7KtoQtGOAL18ZZVEy49eq" class="pixel-btn">demo</a>
-      </nav>
-    </header>
+      <!-- ═══ WHAT ═══ -->
+      <section class="intro">
+        <p>
+          Boku (僕 — "servant") reads a YAML file and runs the tasks inside it.
+          One after another. Variables, iteration, dependencies, conditions —
+          all in YAML.
+        </p>
+        <p class="dim">
+          No <code>#!/bin/bash</code>. No tab-indentation rage. No
+          <code>ifeq</code> syntax. Just a list of things to do.
+        </p>
+      </section>
 
-    <!-- ═══ WHAT ═══ -->
-    <section class="intro">
-      <p>Boku (僕 — "servant") reads a YAML file and runs the tasks inside it. One after another. Variables, iteration, dependencies, conditions — all in YAML.</p>
-      <p class="dim">No <code>#!/bin/bash</code>. No tab-indentation rage. No <code>ifeq</code> syntax. Just a list of things to do.</p>
-    </section>
-
-    <!-- ═══ WHY NOT BASH ═══ -->
-    <section class="why">
-      <h2>why not bash_</h2>
-      <div class="compare">
-        <div class="glass-card compare-card compare-bad">
-          <div class="compare-label">bash</div>
-          <pre class="code-block"><code><span class="dim">#!/bin/bash</span>
+      <!-- ═══ WHY NOT BASH ═══ -->
+      <section class="why">
+        <h2>why not bash_</h2>
+        <div class="compare">
+          <div class="glass-card compare-card compare-bad">
+            <div class="compare-label">bash</div>
+            <pre class="code-block"><code><span class="dim">#!/bin/bash</span>
 <span class="k">for</span> pkg <span class="k">in</span> fzf eza bat; <span class="k">do</span>
   <span class="k">if</span> command -v brew &>/dev/null; <span class="k">then</span>
     brew install <span class="s">"$pkg"</span>
   <span class="k">fi</span>
 <span class="k">done</span></code></pre>
-        </div>
-        <div class="compare-arrow">→</div>
-        <div class="glass-card compare-card compare-good">
-          <div class="compare-label">boku</div>
-          <pre class="code-block"><code><span class="k">variables</span>:
+          </div>
+          <div class="compare-arrow">→</div>
+          <div class="glass-card compare-card compare-good">
+            <div class="compare-label">boku</div>
+            <pre class="code-block"><code><span class="k">variables</span>:
   <span class="v">packages</span>: [fzf, eza, bat]
 
 <span class="k">tasks</span>:
@@ -58,19 +87,19 @@
     <span class="k">if</span>: <span class="s">command -v brew</span>
     <span class="k">iterate</span>: <span class="v">packages</span>
     <span class="k">run</span>: <span class="s">brew install {}</span></code></pre>
+          </div>
         </div>
-      </div>
-    </section>
+      </section>
 
-    <!-- ═══ COMPLEX EXAMPLE ═══ -->
-    <section class="complex-example">
-      <h2>a more complex task_</h2>
-      <div class="glass-card">
-        <div class="example-header">
-          <span class="example-dot"></span>
-          <span class="example-title">daily.yaml</span>
-        </div>
-        <pre class="code-block"><code><span class="k">variables</span>:
+      <!-- ═══ COMPLEX EXAMPLE ═══ -->
+      <section class="complex-example">
+        <h2>a more complex task_</h2>
+        <div class="glass-card">
+          <div class="example-header">
+            <span class="example-dot"></span>
+            <span class="example-title">daily.yaml</span>
+          </div>
+          <pre class="code-block"><code><span class="k">variables</span>:
   <span class="v">vault</span>: <span class="s">~/Documents/Brain/</span>
   <span class="v">daily</span>: <span class="s">${vault}Daily/</span>
 
@@ -98,323 +127,470 @@
       <span class="s">echo ""</span>
       <span class="s">echo "## Today's tasks"</span>
       <span class="s">echo "${daily_tasks}"</span></code></pre>
-        <p class="example-desc">Fetches today's date, pulls Obsidian tasks, gets weather, renders a daily brief.</p>
-      </div>
-    </section>
+          <p class="example-desc">
+            Fetches today's date, pulls Obsidian tasks, gets weather, renders a
+            daily brief.
+          </p>
+        </div>
+      </section>
 
-    <!-- ═══ FEATURES ═══ -->
-    <section class="features">
-      <h2>features_</h2>
-      <div class="glass-card">
-        <table>
-          <tbody>
-            <tr><td><span class="label" style="animation-delay: 0s">iterate</span></td><td>Loop over lists. <code>{}</code> becomes each item.</td></tr>
-            <tr><td><span class="label" style="animation-delay: -1s">depends_on</span></td><td>Control execution order. Tasks wait.</td></tr>
-            <tr><td><span class="label" style="animation-delay: -2s">variables</span></td><td><code>${var}</code> normal · <code>@{var}</code> masked · <code>${env:VAR}</code> env.</td></tr>
-            <tr><td><span class="label" style="animation-delay: -3s">save_output</span></td><td>Capture output into a variable for later tasks.</td></tr>
-            <tr><td><span class="label" style="animation-delay: -4s">if</span></td><td>Shell condition. Skip tasks that don't need to run.</td></tr>
-            <tr><td><span class="label" style="animation-delay: -5s">on_success</span></td><td>Run a command when the task succeeds.</td></tr>
-            <tr><td><span class="label" style="animation-delay: -6s">on_failure</span></td><td>Run a command when the task fails.</td></tr>
-            <tr><td><span class="label" style="animation-delay: -7s">dry_run</span></td><td><code>boku run ‐d</code> previews without executing.</td></tr>
-            <tr><td><span class="label" style="animation-delay: -8s">fail_fast</span></td><td>Abort remaining tasks on first failure.</td></tr>
-          </tbody>
-        </table>
-      </div>
-    </section>
+      <!-- ═══ FEATURES ═══ -->
+      <section class="features">
+        <h2>features_</h2>
+        <div class="glass-card">
+          <table>
+            <tbody>
+              <tr>
+                <td>
+                  <span class="label" style="animation-delay: 0s">iterate</span>
+                </td>
+                <td>Loop over lists. <code>{}</code> becomes each item.</td>
+              </tr>
+              <tr>
+                <td>
+                  <span class="label" style="animation-delay: -1s"
+                    >depends_on</span
+                  >
+                </td>
+                <td>Control execution order. Tasks wait.</td>
+              </tr>
+              <tr>
+                <td>
+                  <span class="label" style="animation-delay: -2s"
+                    >variables</span
+                  >
+                </td>
+                <td>
+                  <code>${var}</code> normal · <code>@{var}</code> masked ·
+                  <code>${env:VAR}</code> env.
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <span class="label" style="animation-delay: -3s"
+                    >save_output</span
+                  >
+                </td>
+                <td>Capture output into a variable for later tasks.</td>
+              </tr>
+              <tr>
+                <td>
+                  <span class="label" style="animation-delay: -4s">if</span>
+                </td>
+                <td>Shell condition. Skip tasks that don't need to run.</td>
+              </tr>
+              <tr>
+                <td>
+                  <span class="label" style="animation-delay: -5s"
+                    >on_success</span
+                  >
+                </td>
+                <td>Run a command when the task succeeds.</td>
+              </tr>
+              <tr>
+                <td>
+                  <span class="label" style="animation-delay: -6s"
+                    >on_failure</span
+                  >
+                </td>
+                <td>Run a command when the task fails.</td>
+              </tr>
+              <tr>
+                <td>
+                  <span class="label" style="animation-delay: -7s"
+                    >dry_run</span
+                  >
+                </td>
+                <td><code>boku run ‐d</code> previews without executing.</td>
+              </tr>
+              <tr>
+                <td>
+                  <span class="label" style="animation-delay: -8s"
+                    >fail_fast</span
+                  >
+                </td>
+                <td>Abort remaining tasks on first failure.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
 
-    <!-- ═══ FAQ ═══ -->
-    <section class="faq">
-      <h2>faq_</h2>
-      <div class="glass-card">
-        <div class="faq-item">
-          <p class="faq-q"><span class="faq-mark">Q:</span> Why not Make?</p>
-          <p class="faq-a">Make's syntax is its own language. Tabs matter. <code>ifeq</code> is unreadable. Boku uses YAML — you already know it.</p>
+      <!-- ═══ FAQ ═══ -->
+      <section class="faq">
+        <h2>faq_</h2>
+        <div class="glass-card">
+          <div class="faq-item">
+            <p class="faq-q"><span class="faq-mark">Q:</span> Why not Make?</p>
+            <p class="faq-a">
+              Make's syntax is its own language. Tabs matter.
+              <code>ifeq</code> is unreadable. Boku uses YAML — you already know
+              it.
+            </p>
+          </div>
+          <div class="faq-item">
+            <p class="faq-q">
+              <span class="faq-mark">Q:</span> Why not Taskfile?
+            </p>
+            <p class="faq-a">
+              Taskfile is great. It's also a bigger surface area — includes,
+              templating, dotenv, remote schemas. Boku is smaller. If you need
+              less, it's simpler.
+            </p>
+          </div>
+          <div class="faq-item">
+            <p class="faq-q">
+              <span class="faq-mark">Q:</span> Why not just write a Python
+              script?
+            </p>
+            <p class="faq-a">
+              You could. But then you're writing Python. Boku is for when you
+              want to describe <em>what</em> to run, not <em>how</em> to run it.
+            </p>
+          </div>
+          <div class="faq-item">
+            <p class="faq-q">
+              <span class="faq-mark">Q:</span> Why no parallel execution?
+            </p>
+            <p class="faq-a">
+              Because I didn't need it, and it would make boku more complex than
+              it needs to be. Sequential is predictable. You can always shell
+              out to <code>&amp;</code> if you want background jobs.
+            </p>
+          </div>
+          <div class="faq-item">
+            <p class="faq-q">
+              <span class="faq-mark">Q:</span> Why no plugin system?
+            </p>
+            <p class="faq-a">
+              Same answer. Didn't need it. Keeps the surface area small. If you
+              need a plugin, write a task that calls it.
+            </p>
+          </div>
+          <div class="faq-item">
+            <p class="faq-q">
+              <span class="faq-mark">Q:</span> Is this serious?
+            </p>
+            <p class="faq-a">
+              It's a YAML file that runs commands. Take it as seriously as you
+              take your shell aliases.
+            </p>
+          </div>
         </div>
-        <div class="faq-item">
-          <p class="faq-q"><span class="faq-mark">Q:</span> Why not Taskfile?</p>
-          <p class="faq-a">Taskfile is great. It's also a bigger surface area — includes, templating, dotenv, remote schemas. Boku is smaller. If you need less, it's simpler.</p>
-        </div>
-        <div class="faq-item">
-          <p class="faq-q"><span class="faq-mark">Q:</span> Why not just write a Python script?</p>
-          <p class="faq-a">You could. But then you're writing Python. Boku is for when you want to describe <em>what</em> to run, not <em>how</em> to run it.</p>
-        </div>
-        <div class="faq-item">
-          <p class="faq-q"><span class="faq-mark">Q:</span> Why no parallel execution?</p>
-          <p class="faq-a">Because I didn't need it, and it would make boku more complex than it needs to be. Sequential is predictable. You can always shell out to <code>&amp;</code> if you want background jobs.</p>
-        </div>
-        <div class="faq-item">
-          <p class="faq-q"><span class="faq-mark">Q:</span> Why no plugin system?</p>
-          <p class="faq-a">Same answer. Didn't need it. Keeps the surface area small. If you need a plugin, write a task that calls it.</p>
-        </div>
-        <div class="faq-item">
-          <p class="faq-q"><span class="faq-mark">Q:</span> Is this serious?</p>
-          <p class="faq-a">It's a YAML file that runs commands. Take it as seriously as you take your shell aliases.</p>
-        </div>
-      </div>
-    </section>
+      </section>
 
-    <!-- ═══ AGENTS ═══ -->
-    <section class="agents">
-      <h2>for agents_</h2>
-      <div class="glass-card">
-        <p>YAML is unambiguous. LLMs can read, write, and modify boku taskfiles without guesswork. <code>skills/</code> has step‐by‐step guides for common patterns — give your agent the skills and a taskfile, and it can add tasks, change dependencies, or create new workflows.</p>
-        <ul class="skills-list">
-          <li>01‐quick‐start.md</li>
-          <li>02‐iteration‐patterns.md</li>
-          <li>03‐task‐dependencies.md</li>
-          <li>04‐variables‐and‐secrets.md</li>
-          <li>05‐conditionals‐and‐helpers.md</li>
-        </ul>
-      </div>
-    </section>
+      <!-- ═══ AGENTS ═══ -->
+      <section class="agents">
+        <h2>for agents_</h2>
+        <div class="glass-card">
+          <p>
+            YAML is unambiguous. LLMs can read, write, and modify boku taskfiles
+            without guesswork. <code>skills/</code> has step‐by‐step guides for
+            common patterns — give your agent the skills and a taskfile, and it
+            can add tasks, change dependencies, or create new workflows.
+          </p>
+          <ul class="skills-list">
+            <li>01‐quick‐start.md</li>
+            <li>02‐iteration‐patterns.md</li>
+            <li>03‐task‐dependencies.md</li>
+            <li>04‐variables‐and‐secrets.md</li>
+            <li>05‐conditionals‐and‐helpers.md</li>
+          </ul>
+        </div>
+      </section>
 
-    <!-- ═══ INSTALL ═══ -->
-    <section class="install" id="install">
-      <h2>install_</h2>
-      <div class="glass-card">
-        <pre class="code-block"><code>$ pipx install boku
-$ uv tool install boku
+      <!-- ═══ INSTALL ═══ -->
+      <section class="install" id="install">
+        <h2>install_</h2>
+        <div class="glass-card">
+          <pre class="code-block"><code>$ pipx install boku2
+$ uv tool install boku2
 $ pip install git+https://git.sr.ht/~hxii/boku</code></pre>
-      </div>
-    </section>
+        </div>
+      </section>
 
-    <!-- ═══ FOOTER ═══ -->
-    <footer>
-      <a href="https://git.sr.ht/~hxii">source</a>
-      <span class="dot">·</span>
-      <a href="https://0xff.nu">0xFF</a>
-      <span class="dot">·</span>
-      <span class="dim">僕</span>
-    </footer>
+      <!-- ═══ FOOTER ═══ -->
+      <footer>
+        <a href="https://git.sr.ht/~hxii">source</a>
+        <span class="dot">·</span>
+        <a href="https://0xff.nu">0xFF</a>
+        <span class="dot">·</span>
+        <span class="dim">僕</span>
+      </footer>
+    </div>
 
-  </div>
+    <script>
+      // ── Progressive scrambling animation ──
+      const words = [
+        "deploy",
+        "build",
+        "daily",
+        "health",
+        "setup",
+        "sync",
+        "backup",
+        "lint",
+      ];
+      const el = document.getElementById("scramble");
+      const CHARS = "▗▘▙▚▛▜▝▞▟░▒▓▉▉█▄▅▆▇";
+      const SCRAMBLE_PASSES = 4;
+      let wordIdx = 0;
+      let state = "scramble-in"; // scramble-in | hold | transition
+      let settled = [];
+      let scrambleCount = [];
+      let timerId = null;
 
-  <script>
-    // ── Progressive scrambling animation ──
-    const words = ['deploy', 'build', 'daily', 'health', 'setup', 'sync', 'backup', 'lint'];
-    const el = document.getElementById('scramble');
-    const CHARS = '▗▘▙▚▛▜▝▞▟░▒▓▉▉█▄▅▆▇';
-    const SCRAMBLE_PASSES = 4;
-    let wordIdx = 0;
-    let state = 'scramble-in'; // scramble-in | hold | transition
-    let settled = [];
-    let scrambleCount = [];
-    let timerId = null;
-
-    function randChar() { return CHARS[Math.floor(Math.random() * CHARS.length)]; }
-    function delay(fn, ms) { clearTimeout(timerId); timerId = setTimeout(fn, Math.max(ms, 1)); }
-
-    function display() {
-      const cur = words[wordIdx];
-      const nxt = words[(wordIdx + 1) % words.length];
-      const maxLen = Math.max(cur.length, nxt.length);
-      let text = '';
-      for (let i = 0; i < maxLen; i++) {
-        if (state === 'scramble-in') {
-          text += (i < cur.length && settled[i]) ? cur[i] : randChar();
-        } else if (state === 'transition') {
-          if (scrambleCount[i] >= SCRAMBLE_PASSES) {
-            text += i < nxt.length ? nxt[i] : ' ';
-          } else {
-            text += randChar();
-          }
-        } else {
-          text += i < cur.length ? cur[i] : ' ';
-        }
+      function randChar() {
+        return CHARS[Math.floor(Math.random() * CHARS.length)];
       }
-      el.textContent = text;
-    }
-
-    function tick() {
-      const cur = words[wordIdx];
-      const nxt = words[(wordIdx + 1) % words.length];
-
-      if (state === 'scramble-in') {
-        // Progressive reveal: settle one new position each tick
-        const nextUnsettled = settled.indexOf(false);
-        if (nextUnsettled !== -1) {
-          settled[nextUnsettled] = true;
-          display();
-          if (nextUnsettled === cur.length - 1) {
-            state = 'hold';
-            delay(tick, 2200);
-          } else {
-            delay(tick, 70 + Math.random() * 70);
-          }
-        } else {
-          state = 'hold';
-          delay(tick, 2200);
-        }
-        return;
+      function delay(fn, ms) {
+        clearTimeout(timerId);
+        timerId = setTimeout(fn, Math.max(ms, 1));
       }
 
-      if (state === 'hold') {
-        // Begin transition to next word
+      function display() {
+        const cur = words[wordIdx];
+        const nxt = words[(wordIdx + 1) % words.length];
         const maxLen = Math.max(cur.length, nxt.length);
-        scrambleCount = new Array(maxLen).fill(0);
-        state = 'transition';
-        delay(tick, 80);
-        return;
-      }
-
-      if (state === 'transition') {
-        // Progressive scramble: advance wave front
-        const front = scrambleCount.findIndex(c => c < SCRAMBLE_PASSES);
-        if (front !== -1) {
-          for (let i = front; i < Math.min(front + 3, scrambleCount.length); i++) {
-            if (scrambleCount[i] < SCRAMBLE_PASSES) scrambleCount[i]++;
+        let text = "";
+        for (let i = 0; i < maxLen; i++) {
+          if (state === "scramble-in") {
+            text += i < cur.length && settled[i] ? cur[i] : randChar();
+          } else if (state === "transition") {
+            if (scrambleCount[i] >= SCRAMBLE_PASSES) {
+              text += i < nxt.length ? nxt[i] : " ";
+            } else {
+              text += randChar();
+            }
+          } else {
+            text += i < cur.length ? cur[i] : " ";
           }
-          display();
-          delay(tick, 35 + Math.random() * 45);
-        } else {
-          wordIdx = (wordIdx + 1) % words.length;
-          settled = new Array(words[wordIdx].length).fill(false);
-          state = 'scramble-in';
-          delay(tick, 600);
+        }
+        el.textContent = text;
+      }
+
+      function tick() {
+        const cur = words[wordIdx];
+        const nxt = words[(wordIdx + 1) % words.length];
+
+        if (state === "scramble-in") {
+          // Progressive reveal: settle one new position each tick
+          const nextUnsettled = settled.indexOf(false);
+          if (nextUnsettled !== -1) {
+            settled[nextUnsettled] = true;
+            display();
+            if (nextUnsettled === cur.length - 1) {
+              state = "hold";
+              delay(tick, 2200);
+            } else {
+              delay(tick, 70 + Math.random() * 70);
+            }
+          } else {
+            state = "hold";
+            delay(tick, 2200);
+          }
+          return;
+        }
+
+        if (state === "hold") {
+          // Begin transition to next word
+          const maxLen = Math.max(cur.length, nxt.length);
+          scrambleCount = new Array(maxLen).fill(0);
+          state = "transition";
+          delay(tick, 80);
+          return;
+        }
+
+        if (state === "transition") {
+          // Progressive scramble: advance wave front
+          const front = scrambleCount.findIndex((c) => c < SCRAMBLE_PASSES);
+          if (front !== -1) {
+            for (
+              let i = front;
+              i < Math.min(front + 3, scrambleCount.length);
+              i++
+            ) {
+              if (scrambleCount[i] < SCRAMBLE_PASSES) scrambleCount[i]++;
+            }
+            display();
+            delay(tick, 35 + Math.random() * 45);
+          } else {
+            wordIdx = (wordIdx + 1) % words.length;
+            settled = new Array(words[wordIdx].length).fill(false);
+            state = "scramble-in";
+            delay(tick, 600);
+          }
         }
       }
-    }
 
-    // Initialize: fully scrambled
-    settled = new Array(words[0].length).fill(false);
-    el.textContent = words[0].replace(/./g, () => randChar());
-    delay(tick, 800);
+      // Initialize: fully scrambled
+      settled = new Array(words[0].length).fill(false);
+      el.textContent = words[0].replace(/./g, () => randChar());
+      delay(tick, 800);
 
-    // ── Cursor blink ──
-    setInterval(() => document.querySelectorAll('.cursor').forEach(c => c.classList.toggle('off')), 800);
+      // ── Cursor blink ──
+      setInterval(
+        () =>
+          document
+            .querySelectorAll(".cursor")
+            .forEach((c) => c.classList.toggle("off")),
+        800,
+      );
 
-    // ── Gooey liquid metaball background ──
-    const canvas = document.getElementById('bgCanvas');
-    const ctx = canvas.getContext('2d');
-    let w, h;
+      // ── Gooey liquid metaball background ──
+      const canvas = document.getElementById("bgCanvas");
+      const ctx = canvas.getContext("2d");
+      let w, h;
 
-    function resize() {
-      w = canvas.width = window.innerWidth;
-      h = canvas.height = window.innerHeight;
-    }
-    window.addEventListener('resize', resize);
-    resize();
+      function resize() {
+        w = canvas.width = window.innerWidth;
+        h = canvas.height = window.innerHeight;
+      }
+      window.addEventListener("resize", resize);
+      resize();
 
-    // CSS filter on canvas creates the metaball "goo" blending
-    canvas.style.filter = 'blur(36px) contrast(1.08)';
+      // CSS filter on canvas creates the metaball "goo" blending
+      canvas.style.filter = "blur(36px) contrast(1.08)";
 
-    // Monochromatic warm palette — amber tones only, matching site accent #e0a84a
-    const palette = [
-      { h: 32, s: 55, l: 38 },
-      { h: 36, s: 60, l: 42 },
-      { h: 40, s: 50, l: 35 },
-      { h: 34, s: 65, l: 45 },
-      { h: 38, s: 45, l: 32 },
-      { h: 30, s: 58, l: 40 },
-    ];
+      // Monochromatic warm palette — amber tones only, matching site accent #e0a84a
+      const palette = [
+        { h: 32, s: 55, l: 38 },
+        { h: 36, s: 60, l: 42 },
+        { h: 40, s: 50, l: 35 },
+        { h: 34, s: 65, l: 45 },
+        { h: 38, s: 45, l: 32 },
+        { h: 30, s: 58, l: 40 },
+      ];
 
-    // Morphing blob: vertices orbit the center, each with its own sine distortion
-    class LiquidBlob {
-      constructor(cx, cy, baseR, color) {
-        this.cx = cx;
-        this.cy = cy;
-        this.baseR = baseR;
-        this.color = color;
-        this.verts = 16;  // vertices around the blob
-        this.phases = [];
-        this.freqs = [];
-        this.amps = [];
-        for (let i = 0; i < this.verts; i++) {
-          this.phases.push(Math.random() * Math.PI * 2);
-          this.freqs.push(0.3 + Math.random() * 0.7);
-          this.amps.push(0.1 + Math.random() * 0.35);
+      // Morphing blob: vertices orbit the center, each with its own sine distortion
+      class LiquidBlob {
+        constructor(cx, cy, baseR, color) {
+          this.cx = cx;
+          this.cy = cy;
+          this.baseR = baseR;
+          this.color = color;
+          this.verts = 16; // vertices around the blob
+          this.phases = [];
+          this.freqs = [];
+          this.amps = [];
+          for (let i = 0; i < this.verts; i++) {
+            this.phases.push(Math.random() * Math.PI * 2);
+            this.freqs.push(0.3 + Math.random() * 0.7);
+            this.amps.push(0.1 + Math.random() * 0.35);
+          }
+          this.vx = (Math.random() - 0.5) * 0.15;
+          this.vy = (Math.random() - 0.5) * 0.15;
+          this.opBase = 0.05 + Math.random() * 0.15;
+          this.opAmp = 0.03 + Math.random() * 0.1;
+          this.opFreq = 0.6 + Math.random() * 0.8;
+          this.opPhase = Math.random() * Math.PI * 2;
         }
-        this.vx = (Math.random() - 0.5) * 0.15;
-        this.vy = (Math.random() - 0.5) * 0.15;
-        this.opBase = 0.05 + Math.random() * 0.15;
-        this.opAmp = 0.03 + Math.random() * 0.1;
-        this.opFreq = 0.6 + Math.random() * 0.8;
-        this.opPhase = Math.random() * Math.PI * 2;
-      }
 
-      update(dt) {
-        this.cx += this.vx;
-        this.cy += this.vy;
-        // Boundary wrap with margin
-        const m = this.baseR * 1.2;
-        if (this.cx < -m) this.cx = w + m;
-        if (this.cx > w + m) this.cx = -m;
-        if (this.cy < -m) this.cy = h + m;
-        if (this.cy > h + m) this.cy = -m;
-      }
-
-      draw(ctx, t) {
-        const s = t * 0.001;
-        ctx.beginPath();
-        for (let i = 0; i <= this.verts; i++) {
-          const idx = i % this.verts;
-          const angle = (idx / this.verts) * Math.PI * 2;
-          const morph = Math.sin(s * this.freqs[idx] + this.phases[idx]) * this.baseR * this.amps[idx];
-          const r = this.baseR + morph;
-          const x = this.cx + Math.cos(angle) * r;
-          const y = this.cy + Math.sin(angle) * r;
-          if (i === 0) ctx.moveTo(x, y);
-          else ctx.lineTo(x, y);
+        update(dt) {
+          this.cx += this.vx;
+          this.cy += this.vy;
+          // Boundary wrap with margin
+          const m = this.baseR * 1.2;
+          if (this.cx < -m) this.cx = w + m;
+          if (this.cx > w + m) this.cx = -m;
+          if (this.cy < -m) this.cy = h + m;
+          if (this.cy > h + m) this.cy = -m;
         }
-        ctx.closePath();
-        // Semi-transparent fill — blur filter handles the gooey blending
-        const op = Math.min(0.8, Math.max(0.15, this.opBase + Math.sin(s * this.opFreq + this.opPhase) * this.opAmp));
-        ctx.fillStyle = `hsla(${this.color.h}, ${this.color.s}%, ${this.color.l}%, ${op})`;
-        ctx.fill();
-      }
-    }
 
-    // Create blobs spaced across the screen
-    const blobs = [];
-    const cols = 5, rows = 3;
-    for (let row = 0; row < rows; row++) {
-      for (let col = 0; col < cols; col++) {
-        const cx = (col + 0.5) * w / cols + (Math.random() - 0.5) * 80;
-        const cy = (row + 0.5) * h / rows + (Math.random() - 0.5) * 60;
-        const r = 120 + Math.random() * 120;
-        const color = palette[(row * cols + col) % palette.length];
+        draw(ctx, t) {
+          const s = t * 0.001;
+          ctx.beginPath();
+          for (let i = 0; i <= this.verts; i++) {
+            const idx = i % this.verts;
+            const angle = (idx / this.verts) * Math.PI * 2;
+            const morph =
+              Math.sin(s * this.freqs[idx] + this.phases[idx]) *
+              this.baseR *
+              this.amps[idx];
+            const r = this.baseR + morph;
+            const x = this.cx + Math.cos(angle) * r;
+            const y = this.cy + Math.sin(angle) * r;
+            if (i === 0) ctx.moveTo(x, y);
+            else ctx.lineTo(x, y);
+          }
+          ctx.closePath();
+          // Semi-transparent fill — blur filter handles the gooey blending
+          const op = Math.min(
+            0.8,
+            Math.max(
+              0.15,
+              this.opBase +
+                Math.sin(s * this.opFreq + this.opPhase) * this.opAmp,
+            ),
+          );
+          ctx.fillStyle = `hsla(${this.color.h}, ${this.color.s}%, ${this.color.l}%, ${op})`;
+          ctx.fill();
+        }
+      }
+
+      // Create blobs spaced across the screen
+      const blobs = [];
+      const cols = 5,
+        rows = 3;
+      for (let row = 0; row < rows; row++) {
+        for (let col = 0; col < cols; col++) {
+          const cx = ((col + 0.5) * w) / cols + (Math.random() - 0.5) * 80;
+          const cy = ((row + 0.5) * h) / rows + (Math.random() - 0.5) * 60;
+          const r = 120 + Math.random() * 120;
+          const color = palette[(row * cols + col) % palette.length];
+          blobs.push(new LiquidBlob(cx, cy, r, color));
+        }
+      }
+
+      // Extra small slow blobs for organic feel
+      for (let i = 0; i < 6; i++) {
+        const cx = Math.random() * w;
+        const cy = Math.random() * h;
+        const r = 50 + Math.random() * 70;
+        const color = palette[Math.floor(Math.random() * palette.length)];
         blobs.push(new LiquidBlob(cx, cy, r, color));
       }
-    }
 
-    // Extra small slow blobs for organic feel
-    for (let i = 0; i < 6; i++) {
-      const cx = Math.random() * w;
-      const cy = Math.random() * h;
-      const r = 50 + Math.random() * 70;
-      const color = palette[Math.floor(Math.random() * palette.length)];
-      blobs.push(new LiquidBlob(cx, cy, r, color));
-    }
+      let lastTime = 0;
+      function animate(now) {
+        const dt = Math.min(now - lastTime, 50); // cap delta
+        lastTime = now;
 
-    let lastTime = 0;
-    function animate(now) {
-      const dt = Math.min(now - lastTime, 50); // cap delta
-      lastTime = now;
+        ctx.clearRect(0, 0, w, h);
 
-      ctx.clearRect(0, 0, w, h);
+        // Draw a subtle dark base so blobs aren't invisible on pure black
+        ctx.fillStyle = "rgba(8, 7, 6, 0.4)";
+        ctx.fillRect(0, 0, w, h);
 
-      // Draw a subtle dark base so blobs aren't invisible on pure black
-      ctx.fillStyle = 'rgba(8, 7, 6, 0.4)';
-      ctx.fillRect(0, 0, w, h);
-
-      for (const b of blobs) {
-        b.update(dt);
-        b.draw(ctx, now);
+        for (const b of blobs) {
+          b.update(dt);
+          b.draw(ctx, now);
+        }
+        requestAnimationFrame(animate);
       }
       requestAnimationFrame(animate);
-    }
-    requestAnimationFrame(animate);
 
-    // ── Entrance animation ──
-    const observer = new IntersectionObserver((entries) => {
-      entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
-    }, { threshold: 0.05, rootMargin: '0px 0px -40px 0px' });
-    document.querySelectorAll('section, footer').forEach(el => observer.observe(el));
-    setTimeout(() => document.querySelectorAll('section, footer').forEach(el => {
-      const r = el.getBoundingClientRect();
-      if (r.top < window.innerHeight + 50 && r.bottom > -50) el.classList.add('visible');
-    }), 50);
-  </script>
-
-</body>
+      // ── Entrance animation ──
+      const observer = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((e) => {
+            if (e.isIntersecting) e.target.classList.add("visible");
+          });
+        },
+        { threshold: 0.05, rootMargin: "0px 0px -40px 0px" },
+      );
+      document
+        .querySelectorAll("section, footer")
+        .forEach((el) => observer.observe(el));
+      setTimeout(
+        () =>
+          document.querySelectorAll("section, footer").forEach((el) => {
+            const r = el.getBoundingClientRect();
+            if (r.top < window.innerHeight + 50 && r.bottom > -50)
+              el.classList.add("visible");
+          }),
+        50,
+      );
+    </script>
+  </body>
 </html>

@@ -20,10 +20,14 @@
     <!-- ═══ NAME WARNING ═══ -->
     <div class="warning-banner">
       <span class="warning-icon">⚠️</span>
-      The <code>boku</code> package name on PyPI is currently squatted.
-      Please install with <strong><code>pip install boku2</code></strong>
-      or <code>uv tool install boku2</code> until the name is cleared.
-      <a href="https://github.com/pypi/support/issues/10729" class="warning-link">Track progress →</a>
+      The <code>boku</code> package name on PyPI is currently squatted. Please
+      install with <strong><code>pip install boku2</code></strong> or
+      <code>uv tool install boku2</code> until the name is cleared.
+      <a
+        href="https://github.com/pypi/support/issues/10729"
+        class="warning-link"
+        >Track progress →</a
+      >
     </div>
 
     <div class="page">
@@ -221,11 +225,11 @@
         <h2>faq_</h2>
         <div class="glass-card">
           <div class="faq-item">
-            <p class="faq-q"><span class="faq-mark">Q:</span> Why not Make?</p>
+            <p class="faq-q">
+              <span class="faq-mark">Q:</span> Why no [X] feature?
+            </p>
             <p class="faq-a">
-              Make's syntax is its own language. Tabs matter.
-              <code>ifeq</code> is unreadable. Boku uses YAML — you already know
-              it.
+              Most likely because I didn't see the need in it.
             </p>
           </div>
           <div class="faq-item">
@@ -233,7 +237,7 @@
               <span class="faq-mark">Q:</span> Why not Taskfile?
             </p>
             <p class="faq-a">
-              Taskfile is great. It's also a bigger surface area — includes,
+              Taskfile is great. It's also a bigger surface area – includes,
               templating, dotenv, remote schemas. Boku is smaller. If you need
               less, it's simpler.
             </p>
@@ -256,15 +260,6 @@
               Because I didn't need it, and it would make boku more complex than
               it needs to be. Sequential is predictable. You can always shell
               out to <code>&amp;</code> if you want background jobs.
-            </p>
-          </div>
-          <div class="faq-item">
-            <p class="faq-q">
-              <span class="faq-mark">Q:</span> Why no plugin system?
-            </p>
-            <p class="faq-a">
-              Same answer. Didn't need it. Keeps the surface area small. If you
-              need a plugin, write a task that calls it.
             </p>
           </div>
           <div class="faq-item">

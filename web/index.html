@@ -1,16 +1,15 @@
 <!doctype html>
 <html lang="en">
   <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>boku — YAML task runner</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link
       href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&display=swap"
-      rel="stylesheet"
-    />
-    <link rel="stylesheet" href="style.css" />
+      rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
   </head>
   <body>
     <canvas id="bgCanvas"></canvas>
@@ -45,7 +44,8 @@
         </p>
         <nav class="hero-nav">
           <a href="#install" class="pixel-btn">install</a>
-          <a href="https://git.sr.ht/~hxii/boku" class="pixel-btn">source</a>
+          <a href="https://github.com/hxii/boku" class="pixel-btn">github</a>
+          <a href="https://git.sr.ht/~hxii/boku" class="pixel-btn">sourcehut</a>
           <a
             href="https://asciinema.org/a/IFzd7KtoQtGOAL18ZZVEy49eq"
             class="pixel-btn"
@@ -56,15 +56,21 @@
 
       <!-- ═══ WHAT ═══ -->
       <section class="intro">
-        <p>
-          Boku (僕 — "servant") reads a YAML file and runs the tasks inside it.
-          One after another. Variables, iteration, dependencies, conditions —
-          all in YAML.
-        </p>
-        <p class="dim">
-          No <code>#!/bin/bash</code>. No tab-indentation rage. No
-          <code>ifeq</code> syntax. Just a list of things to do.
-        </p>
+        <h2>what</h2>
+        <div class="glass-card">
+          <p>
+            <strong
+              >Boku (僕 — "servant") reads a YAML file and runs the tasks inside
+              it.</strong
+            >
+            One after another. Variables, iteration, dependencies, conditions —
+            all in YAML.
+          </p>
+          <p class="dim">
+            No <code>#!/bin/bash</code>. No tab-indentation rage. No
+            <code>ifeq</code> syntax. Just a list of things to do.
+          </p>
+        </div>
       </section>
 
       <!-- ═══ WHY NOT BASH ═══ -->
@@ -144,6 +150,10 @@
         <div class="glass-card">
           <table>
             <tbody>
+              <tr>
+                <th>feature</th>
+                <th>explanation</th>
+              </tr>
               <tr>
                 <td>
                   <span class="label" style="animation-delay: 0s">iterate</span>
@@ -225,51 +235,72 @@
         <h2>faq_</h2>
         <div class="glass-card">
           <div class="faq-item">
-            <p class="faq-q">
-              <span class="faq-mark">Q:</span> Why no [X] feature?
-            </p>
-            <p class="faq-a">
-              Most likely because I didn't see the need in it.
-            </p>
+            <div class="faq-row">
+              <span class="faq-mark">Q</span>
+              <span class="faq-text">Why no [X] feature?</span>
+            </div>
+            <div class="faq-row">
+              <span class="faq-mark">A</span>
+              <span class="faq-text"
+                >Most likely because I didn't see the need in it.</span
+              >
+            </div>
           </div>
           <div class="faq-item">
-            <p class="faq-q">
-              <span class="faq-mark">Q:</span> Why not Taskfile?
-            </p>
-            <p class="faq-a">
-              Taskfile is great. It's also a bigger surface area – includes,
-              templating, dotenv, remote schemas. Boku is smaller. If you need
-              less, it's simpler.
-            </p>
+            <div class="faq-row">
+              <span class="faq-mark">Q</span>
+              <span class="faq-text">Why not Taskfile?</span>
+            </div>
+            <div class="faq-row">
+              <span class="faq-mark">A</span>
+              <span class="faq-text"
+                >Taskfile is great. It's also a bigger surface area – includes,
+                templating, dotenv, remote schemas. Boku is smaller. If you need
+                less, it's simpler.</span
+              >
+            </div>
           </div>
           <div class="faq-item">
-            <p class="faq-q">
-              <span class="faq-mark">Q:</span> Why not just write a Python
-              script?
-            </p>
-            <p class="faq-a">
-              You could. But then you're writing Python. Boku is for when you
-              want to describe <em>what</em> to run, not <em>how</em> to run it.
-            </p>
+            <div class="faq-row">
+              <span class="faq-mark">Q</span>
+              <span class="faq-text">Why not just write a Python script?</span>
+            </div>
+            <div class="faq-row">
+              <span class="faq-mark">A</span>
+              <span class="faq-text"
+                >You could. But then you're writing Python. Boku is for when you
+                want to describe <em>what</em> to run, not <em>how</em> to run
+                it.</span
+              >
+            </div>
           </div>
           <div class="faq-item">
-            <p class="faq-q">
-              <span class="faq-mark">Q:</span> Why no parallel execution?
-            </p>
-            <p class="faq-a">
-              Because I didn't need it, and it would make boku more complex than
-              it needs to be. Sequential is predictable. You can always shell
-              out to <code>&amp;</code> if you want background jobs.
-            </p>
+            <div class="faq-row">
+              <span class="faq-mark">Q</span>
+              <span class="faq-text">Why no parallel execution?</span>
+            </div>
+            <div class="faq-row">
+              <span class="faq-mark">A</span>
+              <span class="faq-text"
+                >Because I didn't need it, and it would make boku more complex
+                than it needs to be. Sequential is predictable. You can always
+                shell out to <code>&amp;</code> if you want background
+                jobs.</span
+              >
+            </div>
           </div>
           <div class="faq-item">
-            <p class="faq-q">
-              <span class="faq-mark">Q:</span> Is this serious?
-            </p>
-            <p class="faq-a">
-              It's a YAML file that runs commands. Take it as seriously as you
-              take your shell aliases.
-            </p>
+            <div class="faq-row">
+              <span class="faq-mark">Q</span>
+              <span class="faq-text">Is this serious?</span>
+            </div>
+            <div class="faq-row">
+              <span class="faq-mark">A</span>
+              <span class="faq-text"
+                >It's a YAML file that runs commands. Take it as seriously as
+                you take your shell aliases.</span
+              >
+            </div>
           </div>
         </div>
       </section>
@@ -298,15 +329,58 @@
       <section class="install" id="install">
         <h2>install_</h2>
         <div class="glass-card">
-          <pre class="code-block"><code>$ pipx install boku2
-$ uv tool install boku2
-$ pip install git+https://git.sr.ht/~hxii/boku</code></pre>
+          <p>Run one of these in your favorite terminal.</p>
+          <table class="install-table">
+            <thead>
+              <tr>
+                <th>src</th>
+                <th>cmd</th>
+                <th>cpy</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><span class="label">pipx</span></td>
+                <td><code>pipx install boku2</code></td>
+                <td>
+                  <button class="copy-btn" data-clip="pipx install boku2">
+                    copy
+                  </button>
+                </td>
+              </tr>
+              <tr>
+                <td><span class="label">uv</span></td>
+                <td><code>uv tool install boku2</code></td>
+                <td>
+                  <button class="copy-btn" data-clip="uv tool install boku2">
+                    copy
+                  </button>
+                </td>
+              </tr>
+              <tr>
+                <td><span class="label">source</span></td>
+                <td>
+                  <code>pip install git+https://git.sr.ht/~hxii/boku</code>
+                </td>
+                <td>
+                  <button
+                    class="copy-btn"
+                    data-clip="pip install git+https://git.sr.ht/~hxii/boku"
+                  >
+                    copy
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
         </div>
       </section>
 
       <!-- ═══ FOOTER ═══ -->
       <footer>
-        <a href="https://git.sr.ht/~hxii">source</a>
+        <a href="https://github.com/hxii/boku">github</a>
+        <span class="dot">·</span>
+        <a href="https://git.sr.ht/~hxii">sourcehut</a>
         <span class="dot">·</span>
         <a href="https://0xff.nu">0xFF</a>
         <span class="dot">·</span>
@@ -431,6 +505,29 @@ $ pip install git+https://git.sr.ht/~hxii/boku</code></pre>
             .forEach((c) => c.classList.toggle("off")),
         800,
       );
+
+      // ── Copy-to-clipboard ──
+      document.querySelectorAll(".copy-btn").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          const text = btn.dataset.clip;
+          navigator.clipboard
+            .writeText(text)
+            .then(() => {
+              btn.textContent = "copied";
+              btn.classList.add("copied");
+              setTimeout(() => {
+                btn.textContent = "copy";
+                btn.classList.remove("copied");
+              }, 1500);
+            })
+            .catch(() => {
+              btn.textContent = "error";
+              setTimeout(() => {
+                btn.textContent = "copy";
+              }, 1500);
+            });
+        });
+      });
 
       // ── Gooey liquid metaball background ──
       const canvas = document.getElementById("bgCanvas");

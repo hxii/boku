@@ -35,6 +35,7 @@
 }
 
 html {
+  scroll-behavior: smooth;
   font: 400 14px/1.6 var(--font);
   color: var(--text);
   background: var(--bg);
@@ -210,21 +211,16 @@ body {
   background: rgba(0, 0, 0, 0.4);
   border: 1px solid rgba(154, 90, 90, 0.35);
   padding: 0.85rem 1.25rem;
-  font-size: 0.85rem;
   line-height: 1.6;
   color: white;
   text-align: center;
   margin-bottom: 1rem;
 }
-.warning-banner .warning-icon {
-  font-size: 1rem;
-}
 .warning-banner code {
   background: rgba(212, 160, 74, 0.12);
   padding: 0.1em 0.4em;
   border-radius: 3px;
-  font-size: 0.9em;
-  color: var(--text-bright);
+  color: var(--hi);
 }
 .warning-banner strong code {
   color: var(--hi);
@@ -246,7 +242,7 @@ body {
 .page {
   position: relative;
   z-index: 3;
-  max-width: 640px;
+  max-width: 840px;
   margin: 0 auto;
   padding: 4rem 1.5rem 6rem;
 }
@@ -339,7 +335,6 @@ body {
 
 .tagline {
   color: var(--text);
-  font-size: 0.9rem;
   max-width: 440px;
   margin-bottom: 1.5rem;
   line-height: 1.6;
@@ -358,7 +353,6 @@ body {
 
 .pixel-btn {
   display: inline-block;
-  font-size: 0.72rem;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.1em;
@@ -543,7 +537,6 @@ td code {
   background: var(--hi-dim);
   padding: 0.1em 0.4em;
   border-radius: 3px;
-  font-size: 0.85em;
   color: var(--hi);
 }
 
@@ -562,12 +555,10 @@ a:hover {
    ═══════════════════════════════════════════ */
 
 .intro p {
-  font-size: 0.95rem;
   line-height: 1.7;
   color: var(--text-bright);
 }
 .intro p.dim {
-  font-size: 0.88rem;
   color: var(--text);
 }
 
@@ -580,7 +571,6 @@ a:hover {
   border: 1px solid rgba(30, 26, 22, 0.9);
   border-radius: 8px;
   padding: 1.25rem 1.5rem;
-  font-size: 0.8rem;
   line-height: 1.75;
   overflow-x: auto;
 }
@@ -632,13 +622,11 @@ a:hover {
 }
 
 .example-title {
-  font-size: 0.8rem;
   font-weight: 600;
   color: var(--text-bright);
 }
 
 .example-hint {
-  font-size: 0.6rem;
   text-transform: uppercase;
   letter-spacing: 0.12em;
   color: var(--text-dim);
@@ -649,7 +637,6 @@ a:hover {
 }
 
 .example-desc {
-  font-size: 0.8rem;
   color: var(--text);
   margin-top: 0.75rem;
   padding-left: 0.25rem;
@@ -671,12 +658,10 @@ a:hover {
 }
 .compare-card .code-block {
   padding: 1rem 1.25rem;
-  font-size: 0.75rem;
   background: rgba(8, 7, 6, 0.4);
 }
 
 .compare-label {
-  font-size: 0.65rem;
   text-transform: uppercase;
   letter-spacing: 0.15em;
   margin-bottom: 0.6rem;
@@ -720,7 +705,6 @@ a:hover {
 
 .compare-arrow {
   color: var(--text);
-  font-size: 1.2rem;
   padding-top: 2.5rem;
   text-align: center;
 }
@@ -732,11 +716,23 @@ a:hover {
 .glass-card table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 0.85rem;
+  background: rgba(8, 7, 6, 0.3);
+  border: 1px solid rgba(122, 112, 104, 0.2);
+}
+.glass-card th {
+  text-align: left;
+  padding: 0.5rem 1rem;
+  border-bottom: 1px solid rgba(122, 112, 104, 0.15);
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--text-dim);
+  font-weight: 600;
 }
 .glass-card td {
-  padding: 0.7rem 1.25rem 0.7rem 0;
-  vertical-align: top;
+  /* padding: 0.7rem 1.25rem 0.7rem 0; */
+  padding: 0.6em 1em;
+  vertical-align: middle;
+  text-transform: uppercase;
   border-bottom: 1px solid rgba(122, 112, 104, 0.12);
 }
 .glass-card td:first-child {
@@ -754,6 +750,9 @@ a:hover {
 .faq-item {
   padding: 1rem 0;
   border-bottom: 1px solid rgba(122, 112, 104, 0.1);
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
 }
 .faq-item:last-child {
   border-bottom: none;
@@ -763,27 +762,25 @@ a:hover {
   padding-top: 0;
 }
 
-.faq-q {
-  font-weight: 600;
-  color: var(--text-bright);
-  margin-bottom: 0.4rem;
-  font-size: 0.9rem;
-  padding-left: 1.25rem;
+.faq-row {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+  padding: 0.25rem 0;
 }
 
 .faq-mark {
   color: var(--hi);
-  margin-right: 0.4em;
-  margin-left: -1.25rem;
+  font-weight: 600;
+  flex-shrink: 0;
+  width: 1.5rem;
 }
 
-.faq-a {
+.faq-text {
   color: var(--text);
-  font-size: 0.88rem;
   line-height: 1.65;
-  padding-left: 1.25rem;
 }
-.faq-a em {
+.faq-text em {
   font-style: italic;
   color: var(--text-bright);
 }
@@ -801,7 +798,6 @@ a:hover {
   gap: 0.4rem;
 }
 .skills-list li {
-  font-size: 0.75rem;
   padding: 0.3rem 0.7rem;
   background: rgba(8, 7, 6, 0.3);
   border: 1px solid rgba(122, 112, 104, 0.2);
@@ -865,11 +861,10 @@ a:hover {
 
 .label {
   display: inline-block;
-  font-size: 0.65rem;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.12em;
-  padding: 0.2em 0.65em;
+  padding: 0.05em 0.15em;
   background: var(--hi);
   color: var(--bg);
   border: 1px solid rgba(212, 160, 74, 0.9);
@@ -902,7 +897,6 @@ footer {
   margin-top: 4rem;
   padding-top: 2rem;
   border-top: 1px solid rgba(122, 112, 104, 0.15);
-  font-size: 0.82rem;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -927,6 +921,74 @@ footer a:hover {
 }
 footer .dot {
   color: rgba(122, 112, 104, 0.35);
+}
+
+/* ═══════════════════════════════════════════
+   INSTALL TABLE
+   ═══════════════════════════════════════════ */
+
+.install-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: rgba(8, 7, 6, 0.3);
+  border: 1px solid rgba(122, 112, 104, 0.2);
+}
+.install-table th {
+  text-align: left;
+  padding: 0.5rem 1rem;
+  border-bottom: 1px solid rgba(122, 112, 104, 0.15);
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--text-dim);
+  font-weight: 600;
+}
+.install-table td {
+  padding: 0.6rem 1rem;
+  border-bottom: 1px solid rgba(122, 112, 104, 0.08);
+  vertical-align: middle;
+}
+.install-table td:first-child {
+  white-space: nowrap;
+}
+.install-table tr:last-child td {
+  border-bottom: none;
+}
+.install-table code {
+  background: var(--hi-dim);
+  padding: 0.1em 0.4em;
+  border-radius: 3px;
+  color: var(--hi);
+}
+
+.copy-btn {
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  padding: 0.35em 0.8em;
+  color: var(--text);
+  background: rgba(122, 112, 104, 0.15);
+  border: 1px solid rgba(122, 112, 104, 0.25);
+  border-radius: 4px;
+  cursor: pointer;
+  transition:
+    background 0.15s,
+    border-color 0.15s,
+    color 0.15s;
+  font-family: var(--font);
+}
+.copy-btn:hover {
+  background: rgba(212, 160, 74, 0.12);
+  border-color: rgba(212, 160, 74, 0.35);
+  color: var(--hi);
+}
+.copy-btn:active {
+  background: rgba(212, 160, 74, 0.22);
+  border-color: var(--hi);
+}
+.copy-btn.copied {
+  color: var(--good);
+  border-color: var(--good-border);
+  background: rgba(106, 154, 90, 0.15);
 }
 
 /* ═══════════════════════════════════════════

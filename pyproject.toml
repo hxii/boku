@@ -1,6 +1,6 @@
 [project]
 name = "boku2"
-version = "0.2.4"
+version = "0.2.4.1"
 description = "Simple, sequential YAML task runner"
 readme = "README.md"
 authors = [{ name = "Paul Glushak (hxii)", email = "paul@glushak.net" }]

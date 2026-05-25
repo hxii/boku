@@ -153,13 +153,15 @@ def run_command(args: BokuArgs):
         elif args.command == "new":
             if not args.file or (isinstance(args.file, str) and args.file.strip() == ""):
                 filename = input("Enter the name of the task file (task_file.yaml): ")
-                filepath = Path().cwd() / filename
-                if filepath.exists():
-                    raise BokuTaskfileError("File already exists.")
-                if filepath.suffix not in [".yaml", ".yml"]:
-                    raise BokuTaskfileError("File must be a .yml/.yaml file.")
-                filepath.write_text(TASKFILE_TEMPLATE)
-                logger.info(f"Created task file: {filepath}")
+            else:
+                filename = args.file
+            filepath = Path().cwd() / filename
+            if filepath.exists():
+                raise BokuTaskfileError("File already exists.")
+            if filepath.suffix not in [".yaml", ".yml"]:
+                raise BokuTaskfileError("File must be a .yml/.yaml file.")
+            filepath.write_text(TASKFILE_TEMPLATE)
+            logger.info(f"Created task file: {filepath}")
 
         else:
             args.func(args)

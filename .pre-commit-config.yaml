@@ -16,14 +16,11 @@ repos:
     rev: v1.31.1
     hooks:
       - id: typos
-  - repo: local
+  - repo: https://github.com/allganize/ty-pre-commit
+    rev: v0.0.39
     hooks:
-      - name: Run ty
-        id: ty
-        language: system
-        entry: uv run ty check src/
-        files: \.py$
-        exclude: ^tests/
+      # Run the type checker.
+      - id: ty-check
   - repo: local
     hooks:
       - name: Find FIX Comments

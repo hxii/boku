@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.2.4.1 - 2026-05-25
+
+### Fixes
+
+- Filename argument passed to `boku new` is now used instead of ignored
+- Documentation updates
+
 ## 0.2.4 - 2026-05-18
 
 ### New Features

@@ -17,6 +17,7 @@ wheels/
 !.build.yml
 !demotask.yml
 !.pre-commit-config.yaml
+graphify-out/
 
 # Unrelated Files
 .DS_Store

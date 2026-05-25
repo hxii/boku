@@ -1,0 +1,314 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>boku — examples</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<style>
+  .back-link {
+    display: inline-flex; align-items: center; gap: 0.4rem;
+    color: var(--text-dim); text-decoration: none;
+    text-transform: uppercase; letter-spacing: 0.12em;
+    font-size: 0.75rem; font-weight: 600;
+    margin-bottom: 2rem; transition: color 0.15s;
+  }
+  .back-link:hover { color: var(--hi); }
+  .back-link::before { content: "←"; font-size: 1.1em; }
+
+  .page-title {
+    font-size: clamp(1.6rem, 4vw, 2.4rem); font-weight: 600;
+    color: var(--text-bright); margin-bottom: 0.5rem;
+    animation: crt-flicker-heading 5s infinite;
+  }
+
+  .page-subtitle { color: var(--text-dim); margin-bottom: 2.5rem; max-width: 520px; line-height: 1.6; }
+
+  .examples-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 1.25rem;
+  }
+  @media (max-width: 640px) { .examples-grid { grid-template-columns: 1fr; } }
+
+  .card-avatar {
+    float: right; width: 64px; height: 64px; border-radius: 8px;
+    border: 1px solid rgba(212, 160, 74, 0.15);
+    background: rgba(0, 0, 0, 0.3);
+    margin-left: 0.75rem; margin-bottom: 0.5rem;
+    transition: transform 0.2s;
+  }
+  .glass-card:hover .card-avatar { transform: scale(1.05); }
+
+  .example-desc { color: var(--text); line-height: 1.65; font-size: 0.85rem; margin-bottom: 0.75rem; clear: both; }
+  .example-desc strong { color: var(--text-bright); }
+
+  .example-tags { display: flex; gap: 0.3rem; flex-wrap: wrap; margin-bottom: 0; }
+  .example-tag {
+    font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.1em;
+    padding: 0.15em 0.5em; background: rgba(212, 160, 74, 0.08);
+    border: 1px solid rgba(212, 160, 74, 0.15); border-radius: 2px;
+    color: var(--hi);
+  }
+
+  .example-code { display: none; margin-top: 0.75rem; }
+  .example-code.open { display: block; animation: slideDown 0.2s ease-out; }
+  @keyframes slideDown { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: translateY(0); } }
+
+  .copy-btn {
+    position: absolute; top: 0.5rem; right: 0.5rem;
+    font-family: var(--font); font-size: 0.65rem; font-weight: 600;
+    text-transform: uppercase; letter-spacing: 0.08em;
+    padding: 0.3em 0.7em; color: var(--text-dim);
+    background: rgba(8, 7, 6, 0.5); border: 1px solid rgba(122, 112, 104, 0.2);
+    border-radius: 3px; cursor: pointer; transition: all 0.15s; z-index: 10;
+  }
+  .copy-btn:hover { color: var(--text); background: rgba(122, 112, 104, 0.15); border-color: rgba(122, 112, 104, 0.35); }
+  .copy-btn.copied { color: var(--good); border-color: var(--good-border); background: rgba(106, 154, 90, 0.15); }
+
+  .expand-hint {
+    text-transform: uppercase; letter-spacing: 0.12em; color: var(--text-dim);
+    font-size: 0.7rem; font-weight: 600; display: flex; align-items: center;
+    gap: 0.3rem; margin-top: 0.75rem; cursor: pointer;
+  }
+  .expand-hint .arrow { transition: transform 0.2s; display: inline-block; }
+  .glass-card.open .expand-hint .arrow { transform: rotate(90deg); }
+</style>
+</head>
+<body>
+<canvas id="bgCanvas"></canvas>
+<div class="scanlines"></div>
+<div class="vignette"></div>
+
+<div class="page">
+  <a href="index.html" class="back-link">back to home</a>
+  <h1 class="page-title">examples_</h1>
+  <p class="page-subtitle">A few taskfiles to get you started. Click any card to reveal the YAML.</p>
+
+  <div class="examples-grid">
+
+    <!-- BREW -->
+    <div class="glass-card" data-name="brew">
+      <canvas class="card-avatar" data-example="brew" width="64" height="64"></canvas>
+      <div class="example-header"><span class="example-dot"></span><span class="example-title">brew.yaml</span></div>
+      <p class="example-desc"><strong>Homebrew runner.</strong> Runs <code>brew update</code>, <code>brew upgrade</code>, then iterates over a package list to install. Clean alternative to shell loops.</p>
+      <div class="example-tags"><span class="example-tag">macos</span><span class="example-tag">iterate</span></div>
+      <div class="expand-hint"><span class="arrow">›</span> show yaml</div>
+      <div class="example-code">
+        <div class="code-block">
+          <button class="copy-btn">copy</button>
+          <pre># Run `brew update`, `brew upgrade` and install some packages
+version: 0.2.4
+author: hxii <hxii@0xff.nu>
+description: Run brew updates
+variables:
+  packages: [eza, bat, jq]
+tasks:
+  brew_update:
+    run: brew update
+  brew_upgrade:
+    run: brew upgrade
+  brew_packages:
+    iterate: packages
+    run: brew install {}</pre>
+        </div>
+      </div>
+    </div>
+
+    <!-- DAILY -->
+    <div class="glass-card" data-name="daily">
+      <canvas class="card-avatar" data-example="daily" width="64" height="64"></canvas>
+      <div class="example-header"><span class="example-dot"></span><span class="example-title">daily.yaml</span></div>
+      <p class="example-desc"><strong>Daily brief.</strong> Fetches today's date, pulls unfinished Obsidian tasks, grabs weather, and prints a morning summary. Uses <code>save_output</code> to chain variables between tasks.</p>
+      <div class="example-tags"><span class="example-tag">variables</span><span class="example-tag">save_output</span><span class="example-tag">obsidian</span></div>
+      <div class="expand-hint"><span class="arrow">›</span> show yaml</div>
+      <div class="example-code">
+        <div class="code-block">
+          <button class="copy-btn">copy</button>
+          <pre>version: 0.2.4
+variables:
+  vault: ~/Documents/Brain/
+  daily: ${vault}Daily/
+tasks:
+  date:
+    run: date +%Y-%m-%d
+    save_output: date
+    suppress_output: true
+  daily_obsidian:
+    if: test -f ${daily}${date}.md
+    run: cat ${daily}${date}.md | grep -E '^- \[ \]'
+    save_output: daily_tasks
+    suppress_output: true
+  weather:
+    run: curl -s wttr.in/new-york?0T | base64
+    save_output: weather
+    suppress_output: true
+  day:
+    run: |
+      echo "## Weather"
+      echo "${weather}" | base64 -d
+      echo ""
+      echo "## Today's tasks"
+      echo "${daily_tasks}"</pre>
+        </div>
+      </div>
+    </div>
+
+    <!-- PYLINT -->
+    <div class="glass-card" data-name="pylint">
+      <canvas class="card-avatar" data-example="pylint" width="64" height="64"></canvas>
+      <div class="example-header"><span class="example-dot"></span><span class="example-title">pylint.yaml</span></div>
+      <p class="example-desc"><strong>Linting pipeline.</strong> Checks that <code>ruff</code> exists, then runs linting and formatting in order with <code>depends_on</code>. Shows <code>on_failure</code> handling.</p>
+      <div class="example-tags"><span class="example-tag">depends_on</span><span class="example-tag">on_failure</span><span class="example-tag">python</span></div>
+      <div class="expand-hint"><span class="arrow">›</span> show yaml</div>
+      <div class="example-code">
+        <div class="code-block">
+          <button class="copy-btn">copy</button>
+          <pre>version: 0.2.4
+author: Paul (hxii) Glushak
+description: Run ruff code linting and formatting
+
+tasks:
+  ensure_ruff:
+    run: command -v ruff
+    on_failure: echo "Ruff not available!"
+  ruff_lint:
+    depends_on: [ensure_ruff]
+    run: ruff check . --fix
+  ruff_format:
+    depends_on: [ruff_lint]
+    run: ruff format .
+  confetti:
+    depends_on: [ruff_lint, ruff_format]
+    run: echo "All good!"</pre>
+        </div>
+      </div>
+    </div>
+
+    <!-- SETUP -->
+    <div class="glass-card" data-name="setup">
+      <canvas class="card-avatar" data-example="setup" width="64" height="64"></canvas>
+      <div class="example-header"><span class="example-dot"></span><span class="example-title">setup.yaml</span></div>
+      <p class="example-desc"><strong>System bootstrap.</strong> Installs Homebrew if missing, then installs <code>dotter</code> and clones your dotfiles. Uses <code>if</code> and <code>depends_on</code> to orchestrate flow.</p>
+      <div class="example-tags"><span class="example-tag">if</span><span class="example-tag">depends_on</span><span class="example-tag">bootstrap</span></div>
+      <div class="expand-hint"><span class="arrow">›</span> show yaml</div>
+      <div class="example-code">
+        <div class="code-block">
+          <button class="copy-btn">copy</button>
+          <pre># System setup using brew and dotter
+version: 0.2.4
+author: hxii <hxii@0xff.nu>
+description: System Configurator
+variables:
+  dots: "git.sr.ht:~hxii/dotfiles"
+  brew: /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+tasks:
+  install_brew:
+    if: "! command -v brew"
+    run: ${brew}
+  ensure_brew:
+    run: command -v brew
+  install_dotter:
+    if: "! brew list -1 | grep dotter"
+    depends_on: [ensure_brew]
+    run: brew install dotter
+  clone_dos:
+    working_dir: ~/
+    run: git clone ${dots}
+  dotter:
+    working_dir: ~/dotfiles
+    run: dotter</pre>
+        </div>
+      </div>
+    </div>
+
+    <!-- SYSTEM HEALTH -->
+    <div class="glass-card" data-name="health">
+      <canvas class="card-avatar" data-example="health" width="64" height="64"></canvas>
+      <div class="example-header"><span class="example-dot"></span><span class="example-title">system-health.yaml</span></div>
+      <p class="example-desc"><strong>Health check.</strong> Disk usage, memory info, active users, temp file cleanup with <code>iterate</code>, and a final report generator. Works on macOS and Linux.</p>
+      <div class="example-tags"><span class="example-tag">iterate</span><span class="example-tag">platform</span><span class="example-tag">reporting</span></div>
+      <div class="expand-hint"><span class="arrow">›</span> show yaml</div>
+      <div class="example-code">
+        <div class="code-block">
+          <button class="copy-btn">copy</button>
+          <pre>version: 0.2.4
+author: Paul (hxii) Glushak <paul@glushak.net>
+description: System health check (macOS + Linux)
+
+variables:
+  disk_warn_pct: 80
+  clean_dirs:
+    - /tmp
+    - ~/.Trash
+  report_file: /tmp/system-report-${env:USER}.txt
+
+tasks:
+  hostname:
+    description: Show the system hostname
+    run: hostname -s
+
+  disk_check:
+    description: Check root disk usage
+    run: df -h / | tail -1
+    save_output: disk_line
+
+  memory_usage:
+    description: Show memory info
+    run: |
+      if [ "$(uname)" = Darwin ]; then
+        vm_stat | head -3
+      else
+        free -h
+      fi
+
+  cleanup_preview:
+    description: Preview cleanup targets
+    depends_on: [disk_check]
+    run: |
+      for d in /tmp ~/.Trash; do
+        t=$(eval echo "$d")
+        test -d "$t" && du -sh "$t" 2>/dev/null
+      done
+    save_output: cleanup_info
+
+  do_cleanup:
+    description: Clean temp and trash dirs
+    depends_on: [cleanup_preview]
+    if: test -d /tmp
+    run: 'rm -rf {} 2>/dev/null; echo Cleaned'
+    iterate: clean_dirs
+
+  generate_report:
+    description: Write health report to file
+    depends_on: [hostname, disk_check, memory_usage]
+    run: |
+      {
+        echo "=== System Health ==="
+        echo "Host: $(hostname -s)"
+        echo "User: ${env:USER}"
+        echo "Date: $(date)"
+        echo ""
+        df -h /
+      } | tee "${report_file}"
+
+  quick:
+    description: Quick system overview (no deps)
+    run: |
+      echo "Host: $(hostname -s)"
+      echo "OS:   $(uname -srm)"
+      echo "Up:   $(uptime | awk -F 'up ' '{print $2}' | awk -F ',' '{print $1}')"
+      echo "Disk: $(df -h / | tail -1 | awk '{print $3}') used</pre>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script src="examples.js"></script>
+</body>
+</html>

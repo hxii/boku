@@ -1,13 +1,13 @@
 ---
 name: "iteration-patterns"
-description: "Master boku's iteration feature - loop over lists, files, and dynamic values"
+description: "Loop over lists and inline values with boku's iterate feature"
 version: "1.0"
 ---
 # Iteration Patterns
 
-Boku's `iterate` feature replaces repetitive shell loops with clean YAML.
+The `iterate` field runs a task once per item in a list.
 
-## Basic Iteration
+## Over a Variable
 
 ```yaml
 variables:
@@ -17,65 +17,62 @@ variables:
     - bat
 
 tasks:
-  install_packages:
+  install:
     iterate: packages
     run: 'brew install {}'
 ```
 
-**Key:** Quote `{}` to prevent YAML parsing it as an empty dict.
+The `{}` placeholder is replaced with each item. **Quote it** to prevent YAML parsing `{}` as an empty mapping.
 
-## Multiple Lists
-
-```yaml
-variables:
-  node_packages:
-    - typescript
-    - prettier
-  python_packages:
-    - requests
-    - pyyaml
-
-tasks:
-  install_node:
-    iterate: node_packages
-    run: 'npm install -g {}'
-
-  install_python:
-    iterate: python_packages
-    run: 'pip install {}'
-```
-
-## Conditional Iteration
+## Over an Inline List
 
 ```yaml
 tasks:
-  cleanup_old_files:
-    if: command -v find
+  cleanup:
     iterate:
       - /tmp
       - ~/.cache
+      - ~/.local/share/trash
     run: 'rm -rf {}/* 2>/dev/null || true'
 ```
 
-## With Dependencies
+## Nested Iteration (Multiple Placeholders)
+
+When items are sub-lists, multiple `{}` placeholders are consumed in order:
 
 ```yaml
-tasks:
-  setup_venv:
-    run: python -m venv .venv
+variables:
+  deps:
+    - [-r requirements.txt, ""]
+    - [-e, .]
 
-  install_deps:
-    iterate:
-      - -r requirements.txt
-      - -e .
-    run: '.venv/bin/pip install {}'
-    depends_on: setup_venv
+tasks:
+  install:
+    iterate: deps
+    run: 'pip install {} {}'
+```
+
+## With a Filter
+
+Only iterate over items matching a pattern:
+
+```yaml
+variables:
+  repos:
+    - github.com/user/a
+    - gitlab.com/user/b
+    - bitbucket.org/user/c
+
+tasks:
+  clone_github:
+    iterate: repos
+    run: 'git clone {}'
 ```
 
 ## Common Pitfalls
 
-| Problem | Solution |
-|---------|----------|
-| `yaml.scanner.ScannerError` | Quote `{}`: `run: 'echo {}'` |
-| Iteration doesn't run | Verify variable is a list under `variables:` |
-| Wrong values substituted | Check for typos in variable names |
+| Problem | Fix |
+|---------|-----|
+| `ScannerError` on `{}` | Always quote: `run: 'echo {}'` |
+| Items not iterating | Confirm the variable is a `list`, not a string |
+| Wrong item substituted | Check variable name spelling under `variables:` |

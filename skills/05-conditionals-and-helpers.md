@@ -1,23 +1,25 @@
 ---
 name: "conditionals-and-helpers"
-description: "Conditional execution and helper integration - skip tasks when tools aren't available"
+description: "Skip tasks with conditions and extend boku with built-in helpers"
 version: "1.0"
 ---
 # Conditionals and Helpers
 
-Run tasks only when conditions are met, and integrate external tools.
-
 ## Conditional Execution
 
+Use `if` to run a task only when a condition is true:
+
 ### Tool Availability
+
 ```yaml
 tasks:
-  install_python_package:
+  install_python:
     if: command -v pip
     run: pip install requests
 ```
 
 ### File/Directory Existence
+
 ```yaml
 tasks:
   remove_cache:
@@ -26,6 +28,7 @@ tasks:
 ```
 
 ### Platform Detection
+
 ```yaml
 tasks:
   macos_only:
@@ -33,25 +36,51 @@ tasks:
     run: brew install --cask rectangle
 ```
 
-## Helper Integration
+When `if` evaluates to false, the task is **skipped** (`run_ok` is set to `None`). Dependent tasks will also be skipped.
 
-Helpers extend boku with external tools.
+## Built-in Helpers
+
+Helpers are shortcuts for common operations, configured in `~/.config/boku/helpers.yml`.
+
+Boku ships with these built-in helpers:
+
+| Helper | What it does |
+|--------|-------------|
+| `notify` | System notification (macOS `osascript`, Linux `notify-send`) |
+| `notify_kitten` | Kitty terminal notification |
+| `download` | Download a URL with `wget` |
+| `http_get` | HTTP GET request with `curl` |
+| `brew` | Install a Homebrew package |
+| `git_clone` | Clone a git repository |
+
+### Using a Helper
 
 ```yaml
 tasks:
-  notify_done:
+  build:
+    run: make build
+
+  done:
     use: notify
     with_arguments:
       title: Build Complete
-      message: All tests passed!
+      message: All tasks passed!
 ```
 
-### Available Helpers
-- `notify` - Desktop notifications
-- `discord` - Discord webhook messages
-- `slack` - Slack webhook messages
+### Adding Custom Helpers
 
-## Combining Features
+Edit `~/.config/boku/helpers.yml`:
+
+```yaml
+my_helper:
+  usage: "Do something useful"
+  run: 'echo "{arg1}" "{arg2}"'
+  args:
+    - arg1
+    - arg2
+```
+
+## Combining Conditionals + Helpers
 
 ```yaml
 tasks:
@@ -59,20 +88,16 @@ tasks:
     if: command -v docker
     use: notify
     with_arguments:
-      title: Starting Docker
-      message: Building container...
-
-  build_image:
-    depends_on: maybe_docker
-    run: docker build -t myapp .
+      title: Docker available
+      message: Docker is installed on this machine
 ```
 
-## Common Conditions
+## Common Conditions Reference
 
 | Condition | Purpose |
 |-----------|---------|
-| `command -v name` | Tool is available |
-| `test -f file` | File exists |
-| `test -d dir` | Directory exists |
-| `test "$(uname)" = Linux` | Platform check |
-| `pgrep process` | Process running |
+| `command -v name` | Check if a tool is installed |
+| `test -f path` | File exists |
+| `test -d path` | Directory exists |
+| `test "$(uname)" = Linux` | OS check |
+| `pgrep name` | Process is running |

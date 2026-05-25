@@ -10,12 +10,12 @@ YAML-valid types are supported:
 
 ```yaml
 variables:
-  myfile: 'demotask.yml'
+  myfile: "demotask.yml"
   head_n: 5
-  secret_variable: 'thisismysupersecrettokenstring'
+  secret_variable: "thisismysupersecrettokenstring"
   files_to_check:
-    - 'file1.txt'
-    - 'file2.txt'
+    - "file1.txt"
+    - "file2.txt"
 ```
 
 ## Using Variables
@@ -33,11 +33,12 @@ tasks:
 In iteration, variables are referenced as a string:
 
 ```yaml
-
-  check_files:
-    iterate: files_to_check
-    run: test -f {}
+check_files:
+  iterate: files_to_check
+  run: test -f {}
 ```
+
+### Environment Variables
 
 You can access environment variables using the `${env:ENV_VAR}` syntax:
 
@@ -47,7 +48,7 @@ tasks:
     run: echo ${env:HOME}
 ```
 
-## Sensitive Variables
+### Sensitive Variables
 
 You can flag variables and environment variables as 'sensitive' using the `@{variable_name}` syntax, which will prevent the variable from being printed in the output:
 
@@ -55,7 +56,6 @@ You can flag variables and environment variables as 'sensitive' using the `@{var
 tasks:
   curl_req:
     run: echo @{secret_variable}
-
 ```
 
 Which would result in:

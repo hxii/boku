@@ -7,16 +7,18 @@ The only _required_ key is `run`, which specifies the command to run.
 
 Task arguments are defined as follows:
 
-- `description` - A string describing the task.
-- `run` - A string with the command to run.
-- `working_dir` - A string with the working directory to use. If not specified, the current directory is used.
-- `save_output` - A string with the name of the [variable](docs/variables.md) to save the output of `run` to.
-- `iterate` - An array of strings (or nested arrays of strings) to iterate the `run` command over. If a string is provided, it will be considered as a variable name to iterate over. Supports multiple placeholders (`{}`) when iterating nested lists.
-- `fail_fast` - A boolean. If `true`, remaining tasks are skipped when this task fails.
-- `depends_on` - An array of task names that this task depends on. The task will not run if any of the dependent tasks fail.
-- `success_code` - An integer representing the success exit code of the command. Defaults to `0`.
-- `on_success` - A string with the command to run on success.
-- `on_failure` - A string with the command to run on failure.
-- `use` - A string with the name of a [helper](docs/helpers.md) function to use.
-- `with_arguments` - A dictionary of arguments to pass to the helper function.
-- `if` - A string with a condition to check before running the task. The condition is a command, e.g. `test -f myfile.txt`.
+| Argument         | Type                       | Required | Description                                                                                               |
+| ---------------- | -------------------------- | -------- | --------------------------------------------------------------------------------------------------------- |
+| `description`    | String                     | No       | Description of what the task does. Mainly used when reading the taskfile. Shown when `--verbose` is used. |
+| `run`            | String                     | Yes      | The command that boku will run. Can be multiline.                                                         |
+| `working_dir`    | String                     | No       | Change the working directory for the command. Default inherits from taskfile.                             |
+| `save_output`    | String                     | No       | The name of the [variable](./variables.md) to save the output to.                                         |
+| `iterate`        | List(String)               | No       | Each item will execute the command defined in `run`                                                       |
+| `fail_fast`      | Boolean                    | No       | Default of `False`. Setting this to `True` will halt taskfile execution if this task fails                |
+| `depends_on`     | List(String)               | No       | List of tasks that have to succeed in order for this task to be executed                                  |
+| `success_code`   | Integer                    | No       | Default of `0`. Which return code is considered as a successful execution                                 |
+| `on_success`     | String                     | No       | The command to execute if this task finished successfully                                                 |
+| `on_failure`     | String                     | No       | The command to execute if this task finished unsuccessfully                                               |
+| `use`            | String                     | No       | The name of the [helper](./helpers.md) to use for this task                                               |
+| `with_arguments` | Dictionary(String, String) | No       | Arguments to pass to the helper defined in `use`                                                          |
+| `if`             | String                     | No       | The command that must execute successfully in order for `run` to execute                                  |

@@ -1,11 +1,10 @@
 ---
 name: "variables-and-secrets"
-description: "Master boku's variable system - cross-references, environment vars, and sensitive values"
+description: "Use variables, environment references, and sensitive values in taskfiles"
 version: "1.0"
 ---
-# Variables and Secrets
 
-Boku variables make taskfiles flexible and reusable.
+# Variables and Secrets
 
 ## Basic Variables
 
@@ -15,9 +14,11 @@ variables:
   python_version: "3.11"
 
 tasks:
-  check_python:
-    run: echo "Using Python ${python_version}"
+  check:
+    run: echo "Using Python ${python_version} for ${project_name}"
 ```
+
+Variables are referenced with `${name}` in commands.
 
 ## Cross-References
 
@@ -27,29 +28,34 @@ Variables can reference other variables:
 variables:
   base_dir: /usr/local
   bin_dir: ${base_dir}/bin
-  venv_path: ${base_dir}/lib/python${python_version}/site-packages
 ```
 
-Values resolve at runtime in the order declared.
+Boku resolves these iteratively until all references are expanded.
 
 ## Environment Variables
 
-```yaml
-variables:
-  user: ${env:USER}           # Current username
-  home: ${env:HOME}           # Home directory
-  api_key: "@{env:API_KEY}"   # SENSITIVE - masked in output
-```
-
-**Important:** Use `@{}` for sensitive values - they're masked in logs.
-
-## Default Values
+Read environment variables with `${env:VAR}`:
 
 ```yaml
-variables:
-  region: ${env:AWS_REGION:-us-east-1}
-  retries: ${env:MAX_RETRIES:-3}
+tasks:
+  show_home:
+    run: echo "${env:HOME}"
 ```
+
+## Sensitive Values
+
+Prefix with `@` to mark a variable as sensitive. Its value is masked (`****`) in log output:
+
+```yaml
+variables:
+  api_key: "@{env:API_KEY}"
+
+tasks:
+  deploy:
+    run: ./deploy.sh "${api_key}"
+```
+
+The `@` tells boku to mask the value in logs. The actual value is still passed to shell commands.
 
 ## In Commands
 
@@ -64,8 +70,12 @@ tasks:
 ## Debugging
 
 ```bash
-# See resolved variables
-boku run task.yaml -v
+boku -v run task.yaml   # See resolved variable values in output
 ```
 
-**Common error:** `Undefined variable` means the variable name isn't found under `variables:` in your taskfile.
+## Common Errors
+
+| Error                                | Cause                                      |
+| ------------------------------------ | ------------------------------------------ |
+| `Undefined variable`                 | Variable name not found under `variables:` |
+| `Environment variable 'X' not found` | Referenced `${env:X}` but X is not set     |
